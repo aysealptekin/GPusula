@@ -19,4 +19,5 @@ class AppColors {
 
   static const Color solukMavi = Color(0xFF7B8FF7);
   static const Color solukgri = Colors.white70;
+  static const Color alertbutton = Color(0xFF1A1D24);
 }

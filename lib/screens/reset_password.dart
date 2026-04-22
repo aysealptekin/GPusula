@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
-import '../helpers/kontroller.dart';
-import '../widgets/custom_text_field.dart';
+import '../core/constants/app_colors.dart';
+import '../core/utils/app_validators.dart';
+import '../presentation/widgets/custom_text_field.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -53,11 +53,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.mail,
-                  size: 50,
-                  color: AppColors.inputIcon,
-                ),
+                const Icon(Icons.mail, size: 50, color: AppColors.inputIcon),
                 const SizedBox(height: 10),
                 const Text(
                   'Şifremi Unuttum',

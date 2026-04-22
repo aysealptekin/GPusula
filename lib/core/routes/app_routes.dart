@@ -10,4 +10,5 @@ class AppRoutes {
   static const profile = "/profile";
   static const pusulaAi = "/pusulaAi";
   static const seruven = "/seruven";
+  static const changePassword = "/changePassword";
 }

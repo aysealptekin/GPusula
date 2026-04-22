@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:roadmap/constants/app_colors.dart';
-import 'package:roadmap/widgets/custom_text_field.dart';
+import '../../core/constants/app_colors.dart';
+import 'package:roadmap/presentation/widgets/custom_text_field.dart';
 
-import '../helpers/kontroller.dart';
-import '../routes/app_routes.dart';
+import '../../core/utils/app_validators.dart';
+import '../../core/routes/app_routes.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -31,7 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 100),
-                const Icon(Icons.navigation, size: 100, color: AppColors.textMain),
+                const Icon(
+                  Icons.navigation,
+                  size: 100,
+                  color: AppColors.textMain,
+                ),
                 const SizedBox(height: 20),
                 const Text(
                   "G-PUSULA",
@@ -47,7 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Text(
                   "Başla!",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 50),
                 CustomTextField(

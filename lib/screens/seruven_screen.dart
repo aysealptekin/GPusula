@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../routes/app_routes.dart';
+import '../core/constants/app_colors.dart';
+import '../core/routes/app_routes.dart';
 
 class SeruvenScreen extends StatefulWidget {
   const SeruvenScreen({super.key});

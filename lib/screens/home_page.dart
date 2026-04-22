@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../routes/app_routes.dart';
+
+import '../core/constants/app_colors.dart';
+import '../core/routes/app_routes.dart';
 
 class HomePageScreen extends StatelessWidget {
   const HomePageScreen({super.key});
@@ -11,15 +12,12 @@ class HomePageScreen extends StatelessWidget {
       backgroundColor: AppColors.arkaplan,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics:
-              const BouncingScrollPhysics(), //sonda ve basta ziplama efekti
+          physics: const BouncingScrollPhysics(),
           child: Padding(
-            //padding: icindeki bilesenlere yazildigi kadar bosluk ekler
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ================= HEADER =================
                 Row(
                   children: [
                     const CircleAvatar(
@@ -27,121 +25,48 @@ class HomePageScreen extends StatelessWidget {
                       radius: 24,
                     ),
                     const SizedBox(width: 15),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Hoş geldin, Mert",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Hoş geldin, Mert',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "İşte finansal özetin",
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                      ],
+                          Text(
+                            'İşte finansal özetin',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                        ],
+                      ),
                     ),
-                    const Spacer(), //row icinde kullanildiginda kendisinden sonraki bilesenleri kalan tum boslugu doldurarak saga iter
                     IconButton(
                       icon: const Icon(
                         Icons.notifications_none_rounded,
                         color: Color(0xFF7B8FF7),
                         size: 28,
                       ),
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return Container(
-                              height: 300,
-                              padding: const EdgeInsets.all(20),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF1A1D24),
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(24),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    "Bildirimler",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      Icons.notifications,
-                                      color: Color(0xFF7B8FF7),
-                                    ),
-                                    title: Text(
-                                      "Bu ay harcamaların %5 arttı",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    subtitle: Text(
-                                      "2 saat önce",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                  Divider(color: Colors.white12),
-                                  ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      Icons.savings,
-                                      color: Colors.orangeAccent,
-                                    ),
-                                    title: Text(
-                                      "Tasarruf hedefin yaklaşıyor",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    subtitle: Text(
-                                      "Bugün",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                  Divider(color: Colors.white12),
-                                  ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      Icons.auto_awesome,
-                                      color: Colors.pinkAccent,
-                                    ),
-                                    title: Text(
-                                      "Pusula AI sana yeni öneri hazırladı",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    subtitle: Text(
-                                      "Dün",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
+                      onPressed: () => _showNotificationsSheet(context),
                     ),
                   ],
                 ),
                 const SizedBox(height: 25),
-
-                // ================= ANA KART (TOPLAM HARCAMA) =================
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(32),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF6366f1), Color(0xFFa855f7)],
+                      colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -156,37 +81,32 @@ class HomePageScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Toplam Harcama",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Toplam Harcama',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
                       ),
                       const Text(
-                        "₺12,450.00",
+                        '₺12,450.00',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 0),
-                      // Mini Grafik Çizgisi
-                      Row(
+                      const SizedBox(height: 4),
+                      const Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.show_chart,
                             color: Colors.white38,
                             size: 35,
                           ),
-                          const Expanded(
-                            child: Text(" harcamalarinda %5 artis goruldu"),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Harcamalarında %5 artış görüldü',
+                              style: TextStyle(color: Colors.white70),
+                            ),
                           ),
                         ],
                       ),
@@ -194,69 +114,61 @@ class HomePageScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // ================= SON İŞLEMLER BAŞLIK =================
                 _buildSectionHeader(
-                  "Son İşlemler",
+                  'Son İşlemler',
                   onSeeAll: () {
                     Navigator.pushNamed(context, AppRoutes.transactions);
                   },
                 ),
                 const SizedBox(height: 15),
                 _buildTransactionItem(
-                  "Coffy",
-                  "Bugün, 09:41",
-                  "-666.00 ₺",
+                  'Coffy',
+                  'Bugün, 09:41',
+                  '-666.00 ₺',
                   Icons.coffee,
                   Colors.orange,
                 ),
                 _buildTransactionItem(
-                  "Taksi",
-                  "Dün, 22:15",
-                  "-8,120.00 ₺",
+                  'Taksi',
+                  'Dün, 22:15',
+                  '-8,120.00 ₺',
                   Icons.directions_car,
                   Colors.blue,
                 ),
                 _buildTransactionItem(
-                  "Babam harclik atti",
-                  "12 Haz, 14:00",
-                  "+612.00 ₺",
+                  ' harçlık ',
+                  '12 Haz, 14:00',
+                  '+612.00 ₺',
                   Icons.favorite,
                   Colors.pink,
                 ),
-
                 const SizedBox(height: 30),
-
-                // ================= KATEGORİLER =================
                 _buildSectionHeader(
-                  "Kategoriler",
+                  'Kategoriler',
                   onSeeAll: () {
                     Navigator.pushNamed(context, AppRoutes.categories);
                   },
                 ),
                 const SizedBox(height: 15),
                 const BudgetCategoryCard(
-                  title: "yemek",
-                  amount: "2,400 ₺",
+                  title: 'Yemek',
+                  amount: '2,400 ₺',
                   progress: 0.9,
-                  status: "DIKKAT ET",
+                  status: 'DIKKAT ET',
                   statusColor: Colors.redAccent,
                   icon: Icons.restaurant,
                 ),
                 const BudgetCategoryCard(
-                  title: "Alisveris",
-                  amount: "1,800 ₺",
+                  title: 'Alışveriş',
+                  amount: '1,800 ₺',
                   progress: 0.6,
-                  status: "stabil",
+                  status: 'Stabil',
                   statusColor: Colors.orangeAccent,
                   icon: Icons.shopping_bag,
                 ),
-
                 const SizedBox(height: 30),
-
-                // ================= BİRİKİM HEDEFLERİ =================
                 const Text(
-                  "Birikim Hedefleri",
+                  'Birikim Hedefleri',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -264,12 +176,12 @@ class HomePageScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 15),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Expanded(
                       child: GoalCard(
-                        title: "tasarruf hedefi",
-                        amount: "12,500 ₺",
+                        title: 'Tasarruf hedefi',
+                        amount: '12,500 ₺',
                         progress: 0.72,
                         icon: Icons.wallet,
                         color: Colors.pinkAccent,
@@ -278,8 +190,8 @@ class HomePageScreen extends StatelessWidget {
                     SizedBox(width: 15),
                     Expanded(
                       child: GoalCard(
-                        title: "tatil fonu",
-                        amount: "8,200 ₺",
+                        title: 'Tatil fonu',
+                        amount: '8,200 ₺',
                         progress: 0.45,
                         icon: Icons.flight,
                         color: Colors.orangeAccent,
@@ -293,11 +205,8 @@ class HomePageScreen extends StatelessWidget {
           ),
         ),
       ),
-
-      // ================= BUTON VE NAVİGASYON =================
       floatingActionButton: Tooltip(
-        //triggerMode: TooltipTriggerMode.tap,
-        message: "yeni harcama ekle",
+        message: 'Yeni harcama ekle',
         preferBelow: false,
         verticalOffset: 38,
         child: FloatingActionButton(
@@ -308,8 +217,6 @@ class HomePageScreen extends StatelessWidget {
           child: const Icon(Icons.add, color: Colors.white, size: 30),
         ),
       ),
-
-      // ================= ALT MENÜ ================
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         onTap: (index) {
@@ -323,6 +230,7 @@ class HomePageScreen extends StatelessWidget {
             Navigator.pushReplacementNamed(context, AppRoutes.profile);
           }
         },
+
         backgroundColor: const Color(0xFF0D0F14),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF7B8FF7),
@@ -332,42 +240,101 @@ class HomePageScreen extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view_rounded),
-            label: "Anasayfa",
+            label: 'Anasayfa',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_rounded),
-            label: "Serüven",
+            label: 'Serüven',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.auto_awesome_rounded),
-            label: "Pusula AI",
+            label: 'Pusula AI',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline_rounded),
-            label: "Profil",
+            label: 'Profil',
           ),
         ],
       ),
     );
   }
 
-  // --- Yardımcı Widgetlar ---
+  void _showNotificationsSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A1D24),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: ListView(
+              shrinkWrap: true,
+              children: const [
+                Text(
+                  'Bildirimler',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20),
+                _NotificationTile(
+                  icon: Icons.notifications,
+                  iconColor: Color(0xFF7B8FF7),
+                  title: 'Bu ay harcamaların %5 arttı',
+                  subtitle: '2 saat önce',
+                ),
+                Divider(color: Colors.white12),
+                _NotificationTile(
+                  icon: Icons.savings,
+                  iconColor: Colors.orangeAccent,
+                  title: 'Tasarruf hedefin yaklaşıyor',
+                  subtitle: 'Bugün',
+                ),
+                Divider(color: Colors.white12),
+                _NotificationTile(
+                  icon: Icons.auto_awesome,
+                  iconColor: Colors.pinkAccent,
+                  title: 'Pusula AI sana yeni öneri hazırladı',
+                  subtitle: 'Dün',
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSectionHeader(String title, {required VoidCallback onSeeAll}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
+        const SizedBox(width: 12),
         InkWell(
           onTap: onSeeAll,
           child: const Text(
-            "Tümünü Gör",
+            'Tümünü Gör',
             style: TextStyle(color: Color(0xFF7B8FF7), fontSize: 14),
           ),
         ),
@@ -406,6 +373,8 @@ class HomePageScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -414,11 +383,14 @@ class HomePageScreen extends StatelessWidget {
                 ),
                 Text(
                   date,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
           Text(
             amount,
             style: TextStyle(
@@ -435,7 +407,35 @@ class HomePageScreen extends StatelessWidget {
   }
 }
 
-// ================= EKSTRA BİLEŞENLER (PROGRESS BARS VB) =================
+class _NotificationTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+
+  const _NotificationTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: iconColor),
+      title: Text(
+        title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(color: Colors.white),
+      ),
+      subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
+    );
+  }
+}
+
 class BudgetCategoryCard extends StatelessWidget {
   final String title;
   final String amount;
@@ -482,10 +482,14 @@ class BudgetCategoryCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     Text(
                       amount,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -495,6 +499,7 @@ class BudgetCategoryCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -534,6 +539,7 @@ class GoalCard extends StatelessWidget {
   final double progress;
   final IconData icon;
   final Color color;
+
   const GoalCard({
     super.key,
     required this.title,
@@ -556,9 +562,16 @@ class GoalCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 15),
-          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
           Text(
             amount,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -577,7 +590,7 @@ class GoalCard extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            "${(progress * 100).toInt()}%",
+            '${(progress * 100).toInt()}%',
             style: const TextStyle(color: Colors.grey, fontSize: 10),
           ),
         ],

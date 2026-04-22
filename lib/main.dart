@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:roadmap/screens/categories_screen.dart';
+import 'package:roadmap/screens/change_password.dart';
 import 'package:roadmap/screens/home_page.dart';
 import 'package:roadmap/screens/profile_screen.dart';
 import 'package:roadmap/screens/pusula_ai.dart';
 import 'package:roadmap/screens/seruven_screen.dart';
 import 'package:roadmap/screens/vibe_check_screen.dart';
-import 'package:roadmap/theme/app_theme.dart';
 import 'screens/add_expense_screen.dart';
-import 'screens/login_screen.dart';
+import 'presentation/pages/login_page.dart';
 import 'screens/reset_password.dart';
-import 'screens/registration_screen.dart';
+import 'presentation/pages/registration_page.dart';
 import 'screens/transactions_screen.dart';
-import 'routes/app_routes.dart';
+import 'core/routes/app_routes.dart';
 
 void main() {
   runApp(const RoadMapApp());
@@ -25,11 +25,10 @@ class RoadMapApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GPUSULA',
-      theme: AppTheme.darkTheme,
       initialRoute: AppRoutes.login,
       routes: {
-        AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.register: (context) => const RegistrationScreen(),
+        AppRoutes.login: (context) => const LoginPage(),
+        AppRoutes.register: (context) => const RegistrationPage(),
         AppRoutes.resetPassword: (context) => const ResetPasswordScreen(),
         AppRoutes.homepage: (context) => const HomePageScreen(),
         AppRoutes.vibeCheck: (context) => const VibeCheckScreen(),
@@ -39,6 +38,7 @@ class RoadMapApp extends StatelessWidget {
         AppRoutes.seruven: (context) => const SeruvenScreen(),
         AppRoutes.pusulaAi: (context) => const PusulaAiScreen(),
         AppRoutes.profile: (context) => const ProfileScreen(),
+        AppRoutes.changePassword: (context) => const ChangePasswordScreen(),
       },
     );
   }

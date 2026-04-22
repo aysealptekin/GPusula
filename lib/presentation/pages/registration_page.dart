@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
-import '../helpers/kontroller.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 import '../widgets/custom_text_field.dart';
+import '../../core/utils/app_validators.dart';
 
-class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
