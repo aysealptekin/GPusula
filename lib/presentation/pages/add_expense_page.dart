@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 
-class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key});
+class AddExpensePage extends StatefulWidget {
+  const AddExpensePage({super.key});
 
   @override
-  State<AddExpenseScreen> createState() => _AddExpenseScreenState();
+  State<AddExpensePage> createState() => _AddExpensePageState();
 }
 
-class _AddExpenseScreenState extends State<AddExpenseScreen> {
+class _AddExpensePageState extends State<AddExpensePage> {
   double _amount = 0.0;
   String _selectedcategory = "food";
   void _addAmount(double value) {

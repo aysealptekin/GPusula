@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
-import '../core/utils/app_validators.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_validators.dart';
 import 'package:roadmap/presentation/widgets/custom_text_field.dart';
 
-class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({super.key});
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmNewPasswordController =

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
 import '../widgets/custom_text_field.dart';
 import '../../core/utils/app_validators.dart';
 

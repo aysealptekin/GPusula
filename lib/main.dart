@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:roadmap/screens/categories_screen.dart';
-import 'package:roadmap/screens/change_password.dart';
-import 'package:roadmap/screens/home_page.dart';
-import 'package:roadmap/screens/profile_screen.dart';
-import 'package:roadmap/screens/pusula_ai.dart';
-import 'package:roadmap/screens/seruven_screen.dart';
-import 'package:roadmap/screens/vibe_check_screen.dart';
-import 'screens/add_expense_screen.dart';
+import 'presentation/pages/add_expense_page.dart';
+import 'presentation/pages/adventure_page.dart';
+import 'presentation/pages/change_password_page.dart';
+import 'presentation/pages/profile_page.dart';
+import 'presentation/pages/pusula_ai_page.dart';
+import 'presentation/pages/transactions_page.dart';
+import 'presentation/pages/vibe_check_page.dart';
+import 'presentation/pages/categories_page.dart';
+import 'presentation/pages/home_page.dart';
 import 'presentation/pages/login_page.dart';
-import 'screens/reset_password.dart';
+import 'presentation/pages/reset_password_page.dart';
 import 'presentation/pages/registration_page.dart';
-import 'screens/transactions_screen.dart';
 import 'core/routes/app_routes.dart';
 
 void main() {
@@ -29,16 +29,16 @@ class RoadMapApp extends StatelessWidget {
       routes: {
         AppRoutes.login: (context) => const LoginPage(),
         AppRoutes.register: (context) => const RegistrationPage(),
-        AppRoutes.resetPassword: (context) => const ResetPasswordScreen(),
-        AppRoutes.homepage: (context) => const HomePageScreen(),
-        AppRoutes.vibeCheck: (context) => const VibeCheckScreen(),
-        AppRoutes.addExpense: (context) => const AddExpenseScreen(),
-        AppRoutes.transactions: (context) => const TransactionsScreen(),
-        AppRoutes.categories: (context) => const CategoriesScreen(),
-        AppRoutes.seruven: (context) => const SeruvenScreen(),
-        AppRoutes.pusulaAi: (context) => const PusulaAiScreen(),
-        AppRoutes.profile: (context) => const ProfileScreen(),
-        AppRoutes.changePassword: (context) => const ChangePasswordScreen(),
+        AppRoutes.resetPassword: (context) => const ResetPasswordPage(),
+        AppRoutes.homepage: (context) => const HomePage(),
+        AppRoutes.vibeCheck: (context) => const VibeCheckPage(),
+        AppRoutes.addExpense: (context) => const AddExpensePage(),
+        AppRoutes.transactions: (context) => const TransactionsPage(),
+        AppRoutes.categories: (context) => const CategoriesPage(),
+        AppRoutes.adventure: (context) => const AdventurePage(),
+        AppRoutes.pusulaAi: (context) => const PusulaAiPage(),
+        AppRoutes.profile: (context) => const ProfilePage(),
+        AppRoutes.changePassword: (context) => const ChangePasswordPage(),
       },
     );
   }

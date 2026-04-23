@@ -9,6 +9,6 @@ class AppRoutes {
   static const categories = "/categories";
   static const profile = "/profile";
   static const pusulaAi = "/pusulaAi";
-  static const seruven = "/seruven";
+  static const adventure = "/adventure";
   static const changePassword = "/changePassword";
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 import '../widgets/swipe_card.dart';
 
-class VibeCheckScreen extends StatelessWidget {
-  const VibeCheckScreen({super.key});
+class VibeCheckPage extends StatelessWidget {
+  const VibeCheckPage({super.key});
 
   @override
   Widget build(BuildContext context) {

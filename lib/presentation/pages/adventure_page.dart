@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
-import '../core/routes/app_routes.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 
-class PusulaAiScreen extends StatefulWidget {
-  const PusulaAiScreen({super.key});
+class AdventurePage extends StatefulWidget {
+  const AdventurePage({super.key});
 
   @override
-  State<PusulaAiScreen> createState() => _PusulaAiScreenState();
+  State<AdventurePage> createState() => _AdventurePageState();
 }
 
-class _PusulaAiScreenState extends State<PusulaAiScreen> {
+class _AdventurePageState extends State<AdventurePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.arkaplan,
-      body: const Center(child: Text("ai sayfasi")),
+      body: const Center(
+        child: Text("seruven vibe check vibe match aylik ozet"),
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
+        currentIndex: 1,
         onTap: (index) {
-          if (index == 2) return;
+          if (index == 1) return;
 
-          if (index == 1) {
-            Navigator.pushReplacementNamed(context, AppRoutes.seruven);
-          } else if (index == 3) {
+          if (index == 3) {
             Navigator.pushReplacementNamed(context, AppRoutes.profile);
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, AppRoutes.pusulaAi);
           } else if (index == 0) {
             Navigator.pushReplacementNamed(context, AppRoutes.homepage);
           }

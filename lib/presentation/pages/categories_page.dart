@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 
-class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen({super.key});
+class CategoriesPage extends StatefulWidget {
+  const CategoriesPage({super.key});
 
   @override
-  State<CategoriesScreen> createState() => _CategoriesScreenState();
+  State<CategoriesPage> createState() => _CategoriesPageState();
 }
 
-class _CategoriesScreenState extends State<CategoriesScreen> {
+class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
+import 'package:roadmap/core/constants/app_colors.dart';
+import 'package:roadmap/presentation/bloc/auth_state.dart';
 import 'package:roadmap/presentation/widgets/custom_text_field.dart';
 
-import '../../core/utils/app_validators.dart';
-import '../../core/routes/app_routes.dart';
+import 'package:roadmap/core/utils/app_validators.dart';
+import 'package:roadmap/core/routes/app_routes.dart';
+import 'package:roadmap/presentation/bloc/auth_cubit.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final AuthCubit authCubit = AuthCubit();
 
   @override
   Widget build(BuildContext context) {
@@ -84,15 +87,31 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
+
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    //Giriş işlemi yapılırken telefonun donmasını engeller.
                     if (_formKey.currentState!.validate()) {
-                      print("Giriş yapıldı");
-                      Navigator.pushNamed(context, AppRoutes.homepage);
-                    } else {
-                      print("giris yapilamadi hatali");
+                      await authCubit.login(
+                        _emailController.text,
+                        _passwordController.text,
+                      );
+
+                      if (authCubit.state is AuthSuccess) {
+                        Navigator.pushReplacementNamed(
+                          context,
+                          AppRoutes.homepage,
+                        );
+                      } else if (authCubit.state is AuthError) {
+                        final errorState = authCubit.state as AuthError;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(errorState.message)),
+                        );
+                      }
                     }
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primarySoft,
                     foregroundColor: Colors.black,
@@ -108,7 +127,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await authCubit.signInWithGoogle();
+                  },
+
                   icon: const Icon(Icons.g_mobiledata, size: 30),
                   label: const Text("Google ile Devam Et"),
                   style: OutlinedButton.styleFrom(

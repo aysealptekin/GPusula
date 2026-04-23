@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 
-class TransactionsScreen extends StatefulWidget {
-  const TransactionsScreen({super.key});
+class TransactionsPage extends StatefulWidget {
+  const TransactionsPage({super.key});
 
   @override
-  State<TransactionsScreen> createState() => _TransactionsScreenState();
+  State<TransactionsPage> createState() => _TransactionsPageState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> {
+class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

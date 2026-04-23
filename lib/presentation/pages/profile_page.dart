@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
-import '../core/routes/app_routes.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, AppRoutes.homepage);
           } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, AppRoutes.seruven);
+            Navigator.pushReplacementNamed(context, AppRoutes.adventure);
           } else if (index == 2) {
             Navigator.pushReplacementNamed(context, AppRoutes.pusulaAi);
           }
@@ -320,6 +320,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // ignore: non_constant_identifier_names
   void _ShowDeleteAccountDialog(BuildContext context) {
     showDialog(
       context: context,

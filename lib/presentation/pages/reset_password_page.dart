@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
-import '../core/utils/app_validators.dart';
-import '../presentation/widgets/custom_text_field.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_validators.dart';
+import '../widgets/custom_text_field.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 

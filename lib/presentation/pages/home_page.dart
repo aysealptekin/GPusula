@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
-import '../core/routes/app_routes.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 
-class HomePageScreen extends StatelessWidget {
-  const HomePageScreen({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +223,7 @@ class HomePageScreen extends StatelessWidget {
           if (index == 0) return;
 
           if (index == 1) {
-            Navigator.pushReplacementNamed(context, AppRoutes.seruven);
+            Navigator.pushReplacementNamed(context, AppRoutes.adventure);
           } else if (index == 2) {
             Navigator.pushReplacementNamed(context, AppRoutes.pusulaAi);
           } else if (index == 3) {
