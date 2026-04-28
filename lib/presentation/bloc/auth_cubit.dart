@@ -1,24 +1,32 @@
+import 'package:flutter_bloc/flutter_bloc.dart'; // Cubit için gerekli
 import 'auth_state.dart';
+import 'package:roadmap/domain/auth/usecases/login_usecase.dart';
 
-class AuthCubit {
-  AuthState state = AuthInitial();
+class AuthCubit extends Cubit<AuthState> { // Cubit'ten türetilmeli
+  final LoginUseCase loginUseCase;
+
+  AuthCubit(this.loginUseCase) : super(AuthInitial()); // Başlangıç durumu verilmeli
 
   Future<void> login(String email, String password) async {
-    //Bu işlem hemen bitmeyecek; internete gidecek, bir cevap bekleyecek ve bir noktada (gelecekte) tamamlanacak
-    state = AuthLoading();
+    emit(AuthLoading()); // state = AuthLoading yerine emit kullanılır
 
     try {
-      if (email.isEmpty || password.isEmpty) {
-        state = AuthError('Email ve sifre bos olamaz');
-      } else {
-        state = AuthSuccess();
-      }
+      // UseCase içindeki asıl metot (genellikle 'call' veya 'execute') çağrılır
+      await loginUseCase.call(email: email, password: password);
+
+      emit(AuthSuccess());
     } catch (e) {
-      state = AuthError('Giris sirasinda hata olustu');
+      emit(AuthError(e.toString()));
     }
   }
 
-  Future<void> signWithGoogle() async {
-    state = AuthLoading();
+  Future<void> signInWithGoogle() async {
+    emit(AuthLoading());
+    try {
+      // Google login işlemleri buraya gelir
+      emit(AuthSuccess());
+    } catch (e) {
+      emit(AuthError('Google ile giriş sırasında hata oluştu'));
+    }
   }
 }
