@@ -20,6 +20,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool _isProcessLoading = false;
+
   String? _sifretekrari(String? yenisifre) {
     if (yenisifre != _passwordController.text) {
       return "sifreler ayni olmalidir";
@@ -30,7 +32,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Future<void> _onRegisterPressed() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() {
+      _isProcessLoading = true;
+    });
+
     final navigator = Navigator.of(context);
+    await Future.delayed(const Duration(seconds: 3));
+    if (!context.mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Kayit basarili, giris sayfasina yonlendiriliyorsunuz"),
@@ -38,8 +47,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ),
     );
 
-    await Future.delayed(const Duration(seconds: 3));
-    if (!context.mounted) return;
+    setState(() {
+      _isProcessLoading = false;
+    });
+
     navigator.pop();
   }
 
@@ -81,8 +92,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   confirmPasswordValidator: _sifretekrari,
                 ),
                 const SizedBox(height: 10),
+
                 RegistrationActions(
                   onRegister: _onRegisterPressed,
+                  isLoading: _isProcessLoading,
                 ),
               ],
             ),

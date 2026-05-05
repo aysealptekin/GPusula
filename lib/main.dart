@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'presentation/pages/add_expense_page.dart';
 import 'presentation/pages/adventure_page.dart';
 import 'presentation/pages/change_password_page.dart';
 import 'presentation/pages/profile_page.dart';
@@ -45,7 +44,6 @@ class RoadMapApp extends StatelessWidget {
         AppRoutes.resetPassword: (context) => const ResetPasswordPage(),
         AppRoutes.homepage: (context) => const HomePage(),
         AppRoutes.vibeCheck: (context) => const VibeCheckPage(),
-        AppRoutes.addExpense: (context) => const AddExpensePage(),
         AppRoutes.transactions: (context) => const TransactionsPage(),
         AppRoutes.categories: (context) => const CategoriesPage(),
         AppRoutes.adventure: (context) => const AdventurePage(),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/utils/app_validators.dart';
-import 'package:roadmap/presentation/widgets/custom_text_field.dart';
+import '../widgets/change_password/change_password_header.dart';
+import '../widgets/change_password/change_password_form_fields.dart';
+import '../widgets/change_password/change_password_actions.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -36,6 +37,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   void _changePassword() {
+    //asil is burda
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -72,76 +74,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.lock_reset,
-                  size: 55,
-                  color: AppColors.inputIcon,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Şifre Değiştir",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: AppColors.textMain,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Güvenliğin için yeni bir şifre belirle",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
+                const ChangePasswordHeader(),
+
                 const SizedBox(height: 30),
-                CustomTextField(
-                  controller: _oldPasswordController,
-                  labelText: "Eski Şifre",
-                  hintText: "",
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                  isRequired: true,
-                  validator: _oldPasswordValidator,
+
+                ChangePasswordFormFields(
+                  oldPasswordController: _oldPasswordController,
+                  newPasswordController: _newPasswordController,
+                  confirmNewPasswordController: _confirmNewPasswordController,
+                  oldPasswordValidator: _oldPasswordValidator,
+                  confirmNewPasswordValidator: _confirmNewPasswordValidator,
                 ),
-                const SizedBox(height: 14),
-                CustomTextField(
-                  controller: _newPasswordController,
-                  labelText: "Yeni Şifre",
-                  hintText: "",
-                  icon: Icons.password,
-                  isPassword: true,
-                  isRequired: true,
-                  validator: AppValidators.sifreDogrula,
-                ),
-                const SizedBox(height: 14),
-                CustomTextField(
-                  controller: _confirmNewPasswordController,
-                  labelText: "Yeni Şifre Tekrar",
-                  hintText: "",
-                  icon: Icons.password,
-                  isPassword: true,
-                  isRequired: true,
-                  validator: _confirmNewPasswordValidator,
-                ),
+
                 const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _changePassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primarySoft,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "ŞİFREYİ DEĞİŞTİR",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
+                ChangePasswordActions(onExecute: _changePassword),
               ],
             ),
           ),

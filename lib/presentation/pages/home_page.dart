@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:roadmap/presentation/widgets/common/custom_bottom_nav.dart';
+import '../widgets/add_expense/add_expense_sheet.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 
@@ -210,52 +211,12 @@ class HomePage extends StatelessWidget {
         preferBelow: false,
         verticalOffset: 38,
         child: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.addExpense);
-          },
+          onPressed: () => _showAddExpenseSheet(context),
           backgroundColor: const Color(0xFF7B8FF7),
           child: const Icon(Icons.add, color: Colors.white, size: 30),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 0) return;
-
-          if (index == 1) {
-            Navigator.pushReplacementNamed(context, AppRoutes.adventure);
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, AppRoutes.pusulaAi);
-          } else if (index == 3) {
-            Navigator.pushReplacementNamed(context, AppRoutes.profile);
-          }
-        },
-
-        backgroundColor: const Color(0xFF0D0F14),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF7B8FF7),
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_rounded),
-            label: 'Anasayfa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_rounded),
-            label: 'Serüven',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome_rounded),
-            label: 'Pusula AI',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline_rounded),
-            label: 'Profil',
-          ),
-        ],
-      ),
+      bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
     );
   }
 
@@ -310,6 +271,22 @@ class HomePage extends StatelessWidget {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showAddExpenseSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: const AddExpenseSheet(),
         );
       },
     );
