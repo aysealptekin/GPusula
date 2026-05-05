@@ -12,9 +12,9 @@ class AuthCubit extends Cubit<AuthState> { // Cubit'ten türetilmeli
 
     try {
       // UseCase içindeki asıl metot (genellikle 'call' veya 'execute') çağrılır
-      await loginUseCase.call(email: email, password: password);
+     final user = await loginUseCase.call(email: email, password: password);
 
-      emit(AuthSuccess());
+      emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));
     }
@@ -23,8 +23,8 @@ class AuthCubit extends Cubit<AuthState> { // Cubit'ten türetilmeli
   Future<void> signInWithGoogle() async {
     emit(AuthLoading());
     try {
-      // Google login işlemleri buraya gelir
-      emit(AuthSuccess());
+      // Google login henüz implemente edilmedi.
+      emit(AuthError('Google ile giriş henüz hazır değil'));
     } catch (e) {
       emit(AuthError('Google ile giriş sırasında hata oluştu'));
     }

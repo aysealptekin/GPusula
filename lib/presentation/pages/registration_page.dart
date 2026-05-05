@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../widgets/custom_text_field.dart';
-import '../../core/utils/app_validators.dart';
+import '../widgets/registration/registration_actions.dart';
+import '../widgets/registration/registration_form_fields.dart';
+import '../widgets/registration/registration_header.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -26,6 +27,31 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return null;
   }
 
+  Future<void> _onRegisterPressed() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final navigator = Navigator.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Kayit basarili, giris sayfasina yonlendiriliyorsunuz"),
+        backgroundColor: AppColors.success,
+      ),
+    );
+
+    await Future.delayed(const Duration(seconds: 3));
+    if (!context.mounted) return;
+    navigator.pop();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,91 +72,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.person_add,
-                  size: 50,
-                  color: AppColors.inputIcon,
+                const RegistrationHeader(),
+                RegistrationFormFields(
+                  nameController: _nameController,
+                  emailController: _emailController,
+                  passwordController: _passwordController,
+                  confirmPasswordController: _confirmPasswordController,
+                  confirmPasswordValidator: _sifretekrari,
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Yeni Hesap Oluştur',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: AppColors.textMain,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  controller: _nameController,
-                  labelText: " İsim Soyisim",
-                  isRequired: true,
-                  hintText: "",
-                  icon: Icons.person,
-                  validator: AppValidators.isimZorunlu,
-                ),
-                const SizedBox(height: 10),
-                CustomTextField(
-                  controller: _emailController,
-                  labelText: " Mail",
-                  isRequired: true,
-                  hintText: '___@___.com',
-                  icon: Icons.mail,
-                  validator: AppValidators.emailDogrula,
-                ),
-                const SizedBox(height: 10),
-                CustomTextField(
-                  controller: _passwordController,
-                  labelText: 'Şifre',
-                  hintText: '',
-                  icon: Icons.password,
-                  isRequired: true,
-                  isPassword: true,
-                  validator: AppValidators.sifreDogrula,
-                ),
-                const SizedBox(height: 10),
-                CustomTextField(
-                  controller: _confirmPasswordController,
-                  labelText: "Şifre tekrarı",
-                  hintText: '',
-                  icon: Icons.password,
-                  isPassword: true,
-                  validator: _sifretekrari,
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      print("kayit oldu");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Kayit basarili, giris sayfasina yonlendiriliyorsunuz",
-                          ),
-                          backgroundColor: AppColors.success,
-                        ),
-                      );
-
-                      Future.delayed(const Duration(seconds: 3), () {
-                        Navigator.pop(context);
-                      });
-                    } else {
-                      print("hatalari duzeltin");
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primarySoft,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "KAYIT OL",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                RegistrationActions(
+                  onRegister: _onRegisterPressed,
                 ),
               ],
             ),

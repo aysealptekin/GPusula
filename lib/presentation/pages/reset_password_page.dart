@@ -17,7 +17,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   void _sifreSifirla() {
     if (_formKey.currentState!.validate()) {
-      print("kod gonderildi");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("${_emailController.text} adresine kod gönderildi!"),

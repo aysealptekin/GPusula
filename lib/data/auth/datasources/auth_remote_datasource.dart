@@ -17,7 +17,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (email == 'test@gmail.com' && password == '123456') {
       final fakeFirebaseData = {
         'id': 'user_123',
-        'email': 'test@test.com',
+        'email': 'test@gmail.com',
         'name': 'kullanici',
       };
       return UserModel.fromMap(fakeFirebaseData);
