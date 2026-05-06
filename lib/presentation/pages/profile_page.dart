@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../widgets/profile/profile_header.dart';
-import '../widgets/profile/settings_tile.dart';
+import '../widgets/profile/setting_tile.dart';
 import '../widgets/profile/danger_zone.dart';
+import '../widgets/common/custom_bottom_nav.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -26,10 +27,10 @@ class ProfilePage extends StatelessWidget {
             children: [
               const ProfileHeader(), // 1
               const SizedBox(height: 24),
-              
-              const _SectionTitle("Hesap"), 
+
+              const _SectionTitle("Hesap"),
               const SizedBox(height: 12),
-              
+
               SettingsTile(
                 icon: Icons.edit_outlined,
                 title: "Profili Düzenle",
@@ -42,7 +43,8 @@ class ProfilePage extends StatelessWidget {
                 title: "Şifre Değiştir",
                 subtitle: "Hesabının güvenliğini güncelle",
                 color: Colors.lightBlueAccent,
-                onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword),
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.changePassword),
               ),
 
               const SizedBox(height: 24),
@@ -63,12 +65,11 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
       ),
-      // BottomNavigationBar kodun buraya gelecek (Aynen kalsın)
+      bottomNavigationBar: const CustomBottomNav(currentIndex: 3),
     );
   }
 }
 
-// Sayfa içindeki küçük başlıklar için basit bir widget
 class _SectionTitle extends StatelessWidget {
   final String title;
   const _SectionTitle(this.title);
@@ -77,7 +78,11 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/routes/app_routes.dart';
 
 class CustomBottomNav extends StatelessWidget {
-  final int currentIndex; // Hangi sayfada olduğumuzu bilmesi lazım
+  final int currentIndex;
 
   const CustomBottomNav({super.key, required this.currentIndex});
 
@@ -11,10 +11,8 @@ class CustomBottomNav extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (index) {
-        // Eğer zaten o sayfadaysak bir şey yapma
         if (index == currentIndex) return;
 
-        // Sayfa değiştirme mantığı
         if (index == 0) {
           Navigator.pushReplacementNamed(context, AppRoutes.homepage);
         } else if (index == 1) {
@@ -32,10 +30,22 @@ class CustomBottomNav extends StatelessWidget {
       showSelectedLabels: true,
       showUnselectedLabels: true,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: "Anasayfa"),
-        BottomNavigationBarItem(icon: Icon(Icons.explore_rounded), label: "Serüven"),
-        BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_rounded), label: "Pusula AI"),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded), label: "Profil"),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.grid_view_rounded),
+          label: "Anasayfa",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.explore_rounded),
+          label: "Serüven",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.auto_awesome_rounded),
+          label: "Pusula AI",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline_rounded),
+          label: "Profil",
+        ),
       ],
     );
   }

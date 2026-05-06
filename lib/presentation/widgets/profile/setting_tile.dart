@@ -37,7 +37,11 @@ class SettingsTile extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         subtitle: Text(
           subtitle,
