@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadmap/core/utils/app_validators.dart';
-import 'package:roadmap/presentation/widgets/custom_text_field.dart';
+import 'package:roadmap/presentation/widgets/common/custom_text_field.dart';
 
 class RegistrationFormFields extends StatelessWidget {
   final TextEditingController nameController;

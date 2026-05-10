@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadmap/core/utils/app_validators.dart';
-import 'package:roadmap/presentation/widgets/custom_text_field.dart';
+import 'package:roadmap/presentation/widgets/common/custom_text_field.dart';
 
 class LoginFormFields extends StatelessWidget {
   final TextEditingController emailController;
@@ -30,6 +30,7 @@ class LoginFormFields extends StatelessWidget {
           hintText: "Sifre",
           icon: Icons.lock_outline,
           isPassword: true,
+          validator: AppValidators.sifreDogrula,
         ),
       ],
     );

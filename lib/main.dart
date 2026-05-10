@@ -38,8 +38,7 @@ class RoadMapApp extends StatelessWidget {
       title: 'GPUSULA',
       initialRoute: AppRoutes.login,
       routes: {
-        AppRoutes.login: (context) =>
-            LoginPage(authCubit: context.read<AuthCubit>()),
+        AppRoutes.login: (context) => const LoginPage(),
         AppRoutes.register: (context) => const RegistrationPage(),
         AppRoutes.resetPassword: (context) => const ResetPasswordPage(),
         AppRoutes.homepage: (context) => const HomePage(),

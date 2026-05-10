@@ -10,12 +10,7 @@ import 'package:roadmap/presentation/widgets/login/login_form_fields.dart';
 import 'package:roadmap/presentation/widgets/login/login_header.dart';
 
 class LoginPage extends StatefulWidget {
-  final AuthCubit authCubit;
-
-  const LoginPage({
-    super.key,
-    required this.authCubit,
-  });
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -31,17 +26,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleAuthError(AuthError errorState) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorState.message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(errorState.message)));
   }
 
   void _onLoginPressed() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().login(
-            _emailController.text.trim(),
-            _passwordController.text.trim(),
-          );
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
     }
   }
 
@@ -54,69 +49,60 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: widget.authCubit,
-      child: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthSuccess) {
-            _handleAuthSuccess();
-          } else if (state is AuthError) {
-            _handleAuthError(state);
-          }
-        },
-        builder: (context, state) {
-          final bool isLoading = state is AuthLoading;
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSuccess) {
+          _handleAuthSuccess();
+        } else if (state is AuthError) {
+          _handleAuthError(state);
+        }
+      },
+      builder: (context, state) {
+        final bool isLoading = state is AuthLoading;
 
-          return Scaffold(
-            backgroundColor: AppColors.bgDark,
-            body: SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const LoginHeader(),
-                        LoginFormFields(
-                          emailController: _emailController,
-                          passwordController: _passwordController,
-                        ),
-                        const SizedBox(height: 10),
-                        LoginActions(
-                          isLoading: isLoading,
-                          onForgotPassword: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.resetPassword,
-                            );
-                          },
-                          onLogin: _onLoginPressed,
-                          onGoogleSignIn: () {
-                            context.read<AuthCubit>().signInWithGoogle();
-                          },
-                        ),
-                        const SizedBox(height: 30),
-                        LoginFooter(
-                          isLoading: isLoading,
-                          onRegister: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.register,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
+        return Scaffold(
+          backgroundColor: AppColors.bgDark,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const LoginHeader(),
+                      LoginFormFields(
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                      ),
+                      const SizedBox(height: 10),
+                      LoginActions(
+                        isLoading: isLoading,
+                        onForgotPassword: () {
+                          Navigator.pushNamed(context, AppRoutes.resetPassword);
+                        },
+                        onLogin: _onLoginPressed,
+                        onGoogleSignIn: () {
+                          context.read<AuthCubit>().signInWithGoogle();
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      LoginFooter(
+                        isLoading: isLoading,
+                        onRegister: () {
+                          Navigator.pushNamed(context, AppRoutes.register);
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
