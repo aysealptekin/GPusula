@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:roadmap/domain/auth/usecases/change_password_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/login_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/logout_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/register_usecase.dart';
@@ -11,12 +12,14 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterUseCase registerUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
   final LogoutUseCase logoutUseCase;
+  final ChangePasswordUseCase changePasswordUseCase;
 
   AuthCubit({
     required this.loginUseCase,
     required this.registerUseCase,
     required this.resetPasswordUseCase,
     required this.logoutUseCase,
+    required this.changePasswordUseCase,
   }) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
@@ -24,7 +27,6 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       final user = await loginUseCase(email: email, password: password);
-
       emit(Authenticated(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -68,6 +70,24 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await logoutUseCase();
       emit(Unauthenticated());
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    emit(AuthLoading());
+
+    try {
+      await changePasswordUseCase(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+
+      emit(PasswordChanged());
     } catch (e) {
       emit(AuthError(e.toString()));
     }

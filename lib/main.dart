@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'presentation/pages/adventure_page.dart';
-import 'presentation/pages/change_password_page.dart';
-import 'presentation/pages/profile_page.dart';
-import 'presentation/pages/pusula_ai_page.dart';
-import 'presentation/pages/transactions_page.dart';
-import 'presentation/pages/vibe_check_page.dart';
-import 'presentation/pages/categories_page.dart';
-import 'presentation/pages/home_page.dart';
+
+import 'core/routes/app_routes.dart';
 import 'data/auth/datasources/auth_remote_datasource.dart';
 import 'data/auth/repositories/auth_repository_impl.dart';
+import 'domain/auth/usecases/change_password_usecase.dart';
 import 'domain/auth/usecases/login_usecase.dart';
-import 'presentation/bloc/auth_cubit.dart';
-import 'presentation/pages/login_page.dart';
-import 'presentation/pages/reset_password_page.dart';
-import 'presentation/pages/registration_page.dart';
-import 'core/routes/app_routes.dart';
+import 'domain/auth/usecases/logout_usecase.dart';
 import 'domain/auth/usecases/register_usecase.dart';
 import 'domain/auth/usecases/reset_password_usecase.dart';
-import 'domain/auth/usecases/logout_usecase.dart';
+import 'presentation/bloc/auth_cubit.dart';
+import 'presentation/pages/adventure_page.dart';
+import 'presentation/pages/categories_page.dart';
+import 'presentation/pages/change_password_page.dart';
+import 'presentation/pages/home_page.dart';
+import 'presentation/pages/login_page.dart';
+import 'presentation/pages/profile_page.dart';
+import 'presentation/pages/pusula_ai_page.dart';
+import 'presentation/pages/registration_page.dart';
+import 'presentation/pages/reset_password_page.dart';
+import 'presentation/pages/transactions_page.dart';
+import 'presentation/pages/vibe_check_page.dart';
 
 void main() {
   final datasource = AuthRemoteDataSourceImpl();
@@ -29,6 +31,7 @@ void main() {
     registerUseCase: RegisterUseCase(repository),
     resetPasswordUseCase: ResetPasswordUseCase(repository),
     logoutUseCase: LogoutUseCase(repository),
+    changePasswordUseCase: ChangePasswordUseCase(repository),
   );
 
   runApp(

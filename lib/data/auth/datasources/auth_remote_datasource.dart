@@ -10,11 +10,31 @@ abstract class AuthRemoteDataSource {
   });
 
   Future<void> logout();
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 
   Future<void> resetPassword({required String email});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  @override
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (oldPassword.isEmpty || newPassword.isEmpty) {
+      throw Exception('Sifre alanlari bos olamaz');
+    }
+
+    if (newPassword.length < 6) {
+      throw Exception('Yeni sifre en az 6 karakter olmali');
+    }
+  }
+
   @override
   Future<UserModel> login({
     required String email,

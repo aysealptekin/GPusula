@@ -16,6 +16,8 @@ class Unauthenticated extends AuthState {}
 
 class PasswordResetEmailSent extends AuthState {}
 
+class PasswordChanged extends AuthState {}
+
 class AuthError extends AuthState {
   final String message;
 
