@@ -1,22 +1,73 @@
-import 'package:flutter_bloc/flutter_bloc.dart'; // Cubit için gerekli
-import 'auth_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:roadmap/domain/auth/usecases/login_usecase.dart';
+import 'package:roadmap/domain/auth/usecases/logout_usecase.dart';
+import 'package:roadmap/domain/auth/usecases/register_usecase.dart';
+import 'package:roadmap/domain/auth/usecases/reset_password_usecase.dart';
+
+import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  // Cubit'ten türetilmeli
   final LoginUseCase loginUseCase;
+  final RegisterUseCase registerUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
+  final LogoutUseCase logoutUseCase;
 
-  AuthCubit(this.loginUseCase)
-    : super(AuthInitial()); // Başlangıç durumu verilmeli
+  AuthCubit({
+    required this.loginUseCase,
+    required this.registerUseCase,
+    required this.resetPasswordUseCase,
+    required this.logoutUseCase,
+  }) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
-    emit(AuthLoading()); // state = AuthLoading yerine emit kullanılır
+    emit(AuthLoading());
 
     try {
-      // UseCase içindeki asıl metot (genellikle 'call' veya 'execute') çağrılır
-      final user = await loginUseCase.call(email: email, password: password);
+      final user = await loginUseCase(email: email, password: password);
 
-      emit(AuthSuccess(user));
+      emit(Authenticated(user));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    emit(AuthLoading());
+
+    try {
+      final user = await registerUseCase(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      emit(Authenticated(user));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    emit(AuthLoading());
+
+    try {
+      await resetPasswordUseCase(email: email);
+      emit(PasswordResetEmailSent());
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  Future<void> logout() async {
+    emit(AuthLoading());
+
+    try {
+      await logoutUseCase();
+      emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
     }
@@ -24,11 +75,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signInWithGoogle() async {
     emit(AuthLoading());
-    try {
-      // Google login henüz implemente edilmedi.
-      emit(AuthError('Google ile giriş henüz hazır değil'));
-    } catch (e) {
-      emit(AuthError('Google ile giriş sırasında hata oluştu'));
-    }
+    emit(AuthError('Google ile giris henuz hazir degil'));
   }
 }

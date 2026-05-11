@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:roadmap/core/constants/app_colors.dart';
 
 class RegistrationActions extends StatelessWidget {
-  final Future<void> Function() onRegister;
+  final VoidCallback onRegister;
+
   final bool isLoading;
 
   const RegistrationActions({

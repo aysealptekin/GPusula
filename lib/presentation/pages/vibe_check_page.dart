@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../widgets/common/custom_text_field.dart';
 import '../widgets/common/swipe_card.dart';
 
 class VibeCheckPage extends StatelessWidget {

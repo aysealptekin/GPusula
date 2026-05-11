@@ -16,12 +16,20 @@ import 'presentation/pages/login_page.dart';
 import 'presentation/pages/reset_password_page.dart';
 import 'presentation/pages/registration_page.dart';
 import 'core/routes/app_routes.dart';
+import 'domain/auth/usecases/register_usecase.dart';
+import 'domain/auth/usecases/reset_password_usecase.dart';
+import 'domain/auth/usecases/logout_usecase.dart';
 
 void main() {
   final datasource = AuthRemoteDataSourceImpl();
   final repository = AuthRepositoryImpl(datasource);
-  final loginUseCase = LoginUseCase(repository);
-  final authCubit = AuthCubit(loginUseCase);
+
+  final authCubit = AuthCubit(
+    loginUseCase: LoginUseCase(repository),
+    registerUseCase: RegisterUseCase(repository),
+    resetPasswordUseCase: ResetPasswordUseCase(repository),
+    logoutUseCase: LogoutUseCase(repository),
+  );
 
   runApp(
     BlocProvider(create: (context) => authCubit, child: const RoadMapApp()),

@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthSuccess) {
+        if (state is Authenticated) {
           _handleAuthSuccess();
         } else if (state is AuthError) {
           _handleAuthError(state);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadmap/presentation/widgets/common/custom_bottom_nav.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
 
 class AdventurePage extends StatefulWidget {
   const AdventurePage({super.key});

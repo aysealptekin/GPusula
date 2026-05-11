@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/routes/app_routes.dart';
 
 class DangerZone extends StatelessWidget {
-  const DangerZone({super.key});
+  final VoidCallback onLogout;
+  final VoidCallback onDeleteAccount;
+
+  const DangerZone({
+    super.key,
+    required this.onLogout,
+    required this.onDeleteAccount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,21 +24,25 @@ class DangerZone extends StatelessWidget {
         children: [
           _buildDangerButton(
             icon: Icons.logout_rounded,
-            label: "Çıkış Yap",
-            onPressed: () { /* Çıkış kodu */ },
+            label: "Cikis Yap",
+            onPressed: onLogout,
           ),
           const SizedBox(height: 12),
           _buildDangerButton(
             icon: Icons.delete_forever_rounded,
-            label: "Hesabı Sil",
-            onPressed: () { /* Silme diyaloğunu aç */ },
+            label: "Hesabi Sil",
+            onPressed: onDeleteAccount,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDangerButton({required IconData icon, required String label, required VoidCallback onPressed}) {
+  Widget _buildDangerButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -41,7 +51,9 @@ class DangerZone extends StatelessWidget {
           side: const BorderSide(color: Colors.redAccent),
           foregroundColor: Colors.redAccent,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         icon: Icon(icon),
         label: Text(label),
