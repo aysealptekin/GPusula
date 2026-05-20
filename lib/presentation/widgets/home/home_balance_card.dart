@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-//total harcama
 class HomeBalanceCard extends StatelessWidget {
-  const HomeBalanceCard({super.key});
+  final double totalAmount;
+
+  const HomeBalanceCard({super.key, required this.totalAmount});
 
   @override
   Widget build(BuildContext context) {
@@ -18,35 +19,35 @@ class HomeBalanceCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.2),
+            color: Colors.blue.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Toplam Harcama',
             style: TextStyle(color: Colors.white70, fontSize: 16),
           ),
           Text(
-            '₺12,450.00',
-            style: TextStyle(
+            '${totalAmount.toStringAsFixed(2)} TL',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 4),
-          Row(
+          const SizedBox(height: 4),
+          const Row(
             children: [
               Icon(Icons.show_chart, color: Colors.white38, size: 35),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Harcamalarında %5 artış görüldü',
+                  'Harcamalarında %80 oraninda artis gozlemlendi',
                   style: TextStyle(color: Colors.white70),
                 ),
               ),

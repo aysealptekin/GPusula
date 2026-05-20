@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  final String userName;
+  final String email;
+
+  const ProfileHeader({super.key, required this.userName, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +26,23 @@ class ProfileHeader extends StatelessWidget {
             backgroundImage: AssetImage('assets/merto1.png'),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Mert", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
-                Text("mert@gmail.com", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
               ],
             ),
           ),

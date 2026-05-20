@@ -23,7 +23,7 @@ class SwipeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20, //golgenin ne kadar bulanik olacagini ayarlar
             offset: const Offset(
               0,
@@ -32,7 +32,7 @@ class SwipeCard extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
         ), //cerceve ekler
       ),
       child: Column(
@@ -41,7 +41,7 @@ class SwipeCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.background.withOpacity(0.5),
+              color: AppColors.background.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 70, color: Colors.green),

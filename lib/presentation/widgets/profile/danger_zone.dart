@@ -18,7 +18,7 @@ class DangerZone extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2A1618),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.25)),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [

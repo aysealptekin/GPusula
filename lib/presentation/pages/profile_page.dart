@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,6 +40,16 @@ class ProfilePage extends StatelessWidget {
       },
       builder: (context, state) {
         final isLoading = state is AuthLoading;
+        final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+        final userName = state is Authenticated
+            ? state.user.name
+            : firebaseUser?.displayName ?? firebaseUser?.email?.split('@').first;
+        final email = state is Authenticated
+            ? state.user.email
+            : firebaseUser?.email ?? '';
+        final displayName = (userName == null || userName.trim().isEmpty)
+            ? 'Kullanıcı'
+            : userName.trim();
 
         return Scaffold(
           backgroundColor: AppColors.arkaplan,
@@ -57,7 +68,7 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const ProfileHeader(),
+                  ProfileHeader(userName: displayName, email: email),
                   const SizedBox(height: 24),
 
                   const _SectionTitle("Hesap"),

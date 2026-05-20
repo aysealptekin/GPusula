@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -19,19 +21,41 @@ abstract class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final firebase_auth.FirebaseAuth firebaseAuth;
+
+  AuthRemoteDataSourceImpl({firebase_auth.FirebaseAuth? firebaseAuth})
+    : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
+
   @override
   Future<void> changePassword({
     required String oldPassword,
     required String newPassword,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-
     if (oldPassword.isEmpty || newPassword.isEmpty) {
       throw Exception('Sifre alanlari bos olamaz');
     }
 
     if (newPassword.length < 6) {
       throw Exception('Yeni sifre en az 6 karakter olmali');
+    }
+
+    final user = firebaseAuth.currentUser;
+    final email = user?.email;
+
+    if (user == null || email == null) {
+      throw Exception('Sifre degistirmek icin tekrar giris yapmalisin');
+    }
+
+    final credential = firebase_auth.EmailAuthProvider.credential(
+      email: email,
+      password: oldPassword,
+    );
+
+    try {
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
     }
   }
 
@@ -40,19 +64,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    await Future.delayed(
-      const Duration(seconds: 1),
-    ); //sahte bir gecikme ag yukleniyor
+    try {
+      final credential = await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    if (email == 'test@gmail.com' && password == '123456A') {
-      final fakeFirebaseData = {
-        'id': 'user_123',
-        'email': 'test@gmail.com',
-        'name': 'kullanici',
-      };
-      return UserModel.fromMap(fakeFirebaseData);
-    } else {
-      throw Exception('Giris bilgileri hatali');
+      return _userFromFirebaseUser(credential.user);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
     }
   }
 
@@ -62,32 +82,73 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-
     if (name.trim().isEmpty || email.trim().isEmpty || password.isEmpty) {
       throw Exception('Kayit bilgileri eksik');
     }
 
-    final fakeFirebaseData = {
-      'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
-      'email': email.trim(),
-      'name': name.trim(),
-    };
+    try {
+      final credential = await firebaseAuth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
 
-    return UserModel.fromMap(fakeFirebaseData);
+      await credential.user?.updateDisplayName(name.trim());
+      await credential.user?.reload();
+
+      return _userFromFirebaseUser(firebaseAuth.currentUser ?? credential.user);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
+    }
   }
 
   @override
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await firebaseAuth.signOut();
   }
 
   @override
   Future<void> resetPassword({required String email}) async {
-    await Future.delayed(const Duration(seconds: 1));
-
     if (email.trim().isEmpty) {
       throw Exception('E-posta adresi gerekli');
+    }
+
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email: email.trim());
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
+    }
+  }
+
+  UserModel _userFromFirebaseUser(firebase_auth.User? user) {
+    if (user == null) {
+      throw Exception('Kullanici bilgisi alinamadi');
+    }
+
+    return UserModel(
+      id: user.uid,
+      email: user.email ?? '',
+      name: user.displayName ?? user.email?.split('@').first ?? '',
+    );
+  }
+
+  String _authErrorMessage(firebase_auth.FirebaseAuthException error) {
+    switch (error.code) {
+      case 'invalid-email':
+        return 'E-posta adresi gecersiz';
+      case 'user-disabled':
+        return 'Bu kullanici hesabi devre disi';
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Giris bilgileri hatali';
+      case 'email-already-in-use':
+        return 'Bu e-posta adresi zaten kullaniliyor';
+      case 'weak-password':
+        return 'Sifre daha guclu olmali';
+      case 'requires-recent-login':
+        return 'Bu islem icin tekrar giris yapmalisin';
+      default:
+        return error.message ?? 'Kimlik dogrulama hatasi';
     }
   }
 }

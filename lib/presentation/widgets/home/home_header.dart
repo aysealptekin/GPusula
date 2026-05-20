@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final String userName;
+
+  const HomeHeader({super.key, required this.userName});
 
   void _showNotificationsSheet(BuildContext context) {
     showModalBottomSheet<void>(
@@ -61,27 +63,26 @@ class HomeHeader extends StatelessWidget {
           radius: 24,
         ),
         const SizedBox(width: 15),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Hoş geldin, Mert',
-                style: TextStyle(
+                'Hoş geldin, $userName',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
+              const Text(
                 'İşte finansal özetin',
                 style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],
           ),
         ),
-
         IconButton(
           icon: const Icon(
             Icons.notifications_none_rounded,
@@ -95,7 +96,6 @@ class HomeHeader extends StatelessWidget {
   }
 }
 
-// Bildirim satırı
 class _NotificationTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
