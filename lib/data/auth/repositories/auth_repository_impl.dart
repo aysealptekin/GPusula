@@ -17,6 +17,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<User> signInWithGoogle() {
+    return remoteDataSource.signInWithGoogle();
+  }
+
+  @override
   Future<User> register({
     required String name,
     required String email,

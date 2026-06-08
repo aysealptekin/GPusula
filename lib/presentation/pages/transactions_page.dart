@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../data/models/transaction_model.dart';
+import '../../domain/transaction/entities/transaction.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../cubit/expense/expense_state.dart';
 import '../widgets/add_expense/add_expense_sheet.dart';
@@ -35,7 +35,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _initializedFromRoute = true;
   }
 
-  void _showEditSheet(TransactionModel transaction) {
+  void _showEditSheet(TransactionEntity transaction) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -49,7 +49,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  Future<void> _confirmDelete(TransactionModel transaction) async {
+  Future<void> _confirmDelete(TransactionEntity transaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -113,7 +113,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
           final transactions = state is ExpenseLoaded
               ? state.expenses
-              : <TransactionModel>[];
+              : <TransactionEntity>[];
 
           if (transactions.isEmpty) {
             return const Center(
@@ -164,8 +164,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  List<TransactionModel> _filteredTransactions(
-    List<TransactionModel> transactions,
+  List<TransactionEntity> _filteredTransactions(
+    List<TransactionEntity> transactions,
   ) {
     if (_selectedType == 'income') {
       return transactions.where((transaction) => transaction.isIncome).toList();

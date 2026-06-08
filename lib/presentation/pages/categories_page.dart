@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../data/models/transaction_model.dart';
+import '../../domain/transaction/entities/transaction.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../cubit/expense/expense_state.dart';
 import '../helpers/expense_view_helpers.dart';
@@ -29,7 +29,7 @@ class CategoriesPage extends StatelessWidget {
 
           final transactions = state is ExpenseLoaded
               ? state.expenses
-              : <TransactionModel>[];
+              : <TransactionEntity>[];
           final expenses = transactions
               .where((transaction) => transaction.isExpense)
               .toList();
@@ -49,7 +49,9 @@ class CategoriesPage extends StatelessWidget {
                 title: category,
                 amount: '${amount.toStringAsFixed(2)} TL',
                 progress: ratio.clamp(0.0, 1.0).toDouble(),
-                status: amount == 0 ? 'YOK' : '${(ratio * 100).toStringAsFixed(0)}%',
+                status: amount == 0
+                    ? 'YOK'
+                    : '${(ratio * 100).toStringAsFixed(0)}%',
                 statusColor: ExpenseViewHelpers.categoryColor(category),
                 icon: ExpenseViewHelpers.categoryIcon(category),
                 onTap: () => Navigator.pushNamed(
@@ -65,10 +67,11 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 
-  Map<String, double> _categoryTotals(List<TransactionModel> expenses) {
+  Map<String, double> _categoryTotals(List<TransactionEntity> expenses) {
     final totals = <String, double>{};
     for (final expense in expenses) {
-      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+      totals[expense.category] =
+          (totals[expense.category] ?? 0) + expense.amount;
     }
     return totals;
   }

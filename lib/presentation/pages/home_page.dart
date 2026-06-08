@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../data/models/transaction_model.dart';
+import '../../domain/transaction/entities/transaction.dart';
 import '../bloc/auth_cubit.dart';
 import '../bloc/auth_state.dart';
 import '../cubit/expense/expense_cubit.dart';
@@ -59,7 +59,7 @@ class HomePage extends StatelessWidget {
       builder: (context, expenseState) {
         final transactions = expenseState is ExpenseLoaded
             ? expenseState.expenses
-            : <TransactionModel>[];
+            : <TransactionEntity>[];
         final expenses = transactions
             .where((transaction) => transaction.isExpense)
             .toList();
@@ -109,7 +109,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Map<String, double> _categoryTotals(List<TransactionModel> expenses) {
+  Map<String, double> _categoryTotals(List<TransactionEntity> expenses) {
     final totals = <String, double>{};
     for (final expense in expenses) {
       totals[expense.category] =

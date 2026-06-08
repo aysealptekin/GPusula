@@ -24,7 +24,7 @@ class LoginActions extends StatelessWidget {
           child: TextButton(
             onPressed: isLoading ? null : onForgotPassword,
             child: const Text(
-              "Şifremi Unuttum",
+              'Şifremi Unuttum',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -41,7 +41,7 @@ class LoginActions extends StatelessWidget {
             ),
           ),
           child: Text(
-            isLoading ? "Yükleniyor..." : " GİRİŞ YAP",
+            isLoading ? 'Yükleniyor...' : 'GİRİŞ YAP',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
@@ -49,7 +49,7 @@ class LoginActions extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: isLoading ? null : onGoogleSignIn,
           icon: const Icon(Icons.g_mobiledata, size: 30),
-          label: Text(isLoading ? "Yükleniyor..." : "Google ile Devam Et"),
+          label: Text(isLoading ? 'Yükleniyor...' : 'Google ile Devam Et'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textMain,
             side: const BorderSide(color: AppColors.border),

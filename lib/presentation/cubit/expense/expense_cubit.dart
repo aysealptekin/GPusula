@@ -2,18 +2,32 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/models/transaction_model.dart';
-import '../../../data/services/transaction_service.dart';
+import '../../../domain/transaction/entities/transaction.dart';
+import '../../../domain/transaction/usecases/add_transaction_usecase.dart';
+import '../../../domain/transaction/usecases/delete_transaction_usecase.dart';
+import '../../../domain/transaction/usecases/update_transaction_usecase.dart';
+import '../../../domain/transaction/usecases/update_vibe_status_usecase.dart';
+import '../../../domain/transaction/usecases/watch_transactions_usecase.dart';
 import 'expense_state.dart';
 
 class ExpenseCubit extends Cubit<ExpenseState> {
-  final TransactionService transactionService;
+  final WatchTransactionsUseCase watchTransactionsUseCase;
+  final AddTransactionUseCase addTransactionUseCase;
+  final UpdateTransactionUseCase updateTransactionUseCase;
+  final DeleteTransactionUseCase deleteTransactionUseCase;
+  final UpdateVibeStatusUseCase updateVibeStatusUseCase;
 
-  StreamSubscription<List<TransactionModel>>? _subscription;
-  List<TransactionModel> _expenses = [];
+  StreamSubscription<List<TransactionEntity>>? _subscription;
+  List<TransactionEntity> _expenses = [];
   String? _userId;
 
-  ExpenseCubit({required this.transactionService}) : super(ExpenseInitial());
+  ExpenseCubit({
+    required this.watchTransactionsUseCase,
+    required this.addTransactionUseCase,
+    required this.updateTransactionUseCase,
+    required this.deleteTransactionUseCase,
+    required this.updateVibeStatusUseCase,
+  }) : super(ExpenseInitial());
 
   void watchUserExpenses(String userId) {
     if (_userId == userId && _subscription != null) return;
@@ -21,7 +35,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     _userId = userId;
     emit(ExpenseLoading());
     _subscription?.cancel();
-    _subscription = transactionService.watchTransactions(userId).listen(
+    _subscription = watchTransactionsUseCase(userId).listen(
       (expenses) {
         _expenses = expenses;
         emit(ExpenseLoaded(expenses: expenses));
@@ -47,7 +61,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     emit(ExpenseLoaded(expenses: _expenses, isSaving: true));
 
     try {
-      await transactionService.addTransaction(
+      await addTransactionUseCase(
         userId: userId,
         title: title,
         amount: amount,
@@ -70,10 +84,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     }
 
     try {
-      await transactionService.deleteTransaction(
-        userId: userId,
-        transactionId: expenseId,
-      );
+      await deleteTransactionUseCase(userId: userId, transactionId: expenseId);
       return true;
     } catch (error) {
       emit(ExpenseError(error.toString()));
@@ -98,13 +109,37 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     emit(ExpenseLoaded(expenses: _expenses, isSaving: true));
 
     try {
-      await transactionService.updateTransaction(
+      await updateTransactionUseCase(
         userId: userId,
         transactionId: expenseId,
         title: title,
         amount: amount,
         category: category,
         type: type,
+      );
+      return true;
+    } catch (error) {
+      emit(ExpenseError(error.toString()));
+      emit(ExpenseLoaded(expenses: _expenses));
+      return false;
+    }
+  }
+
+  Future<bool> markVibeStatus({
+    required String expenseId,
+    required String vibeStatus,
+  }) async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(ExpenseError('Vibe değerlendirmesi için giriş yapmalısın'));
+      return false;
+    }
+
+    try {
+      await updateVibeStatusUseCase(
+        userId: userId,
+        transactionId: expenseId,
+        vibeStatus: vibeStatus,
       );
       return true;
     } catch (error) {

@@ -1,4 +1,4 @@
-import '../../../data/models/transaction_model.dart';
+import '../../../domain/transaction/entities/transaction.dart';
 
 abstract class ExpenseState {}
 
@@ -7,7 +7,7 @@ class ExpenseInitial extends ExpenseState {}
 class ExpenseLoading extends ExpenseState {}
 
 class ExpenseLoaded extends ExpenseState {
-  final List<TransactionModel> expenses;
+  final List<TransactionEntity> expenses;
   final bool isSaving;
 
   ExpenseLoaded({required this.expenses, this.isSaving = false});

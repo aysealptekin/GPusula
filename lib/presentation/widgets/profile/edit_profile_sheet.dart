@@ -102,10 +102,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
           Center(
             child: Stack(
               children: [
-                CircleAvatar(
-                  radius: 46,
-                  backgroundImage: _profileImage(),
-                ),
+                CircleAvatar(radius: 46, backgroundImage: _profileImage()),
                 Positioned(
                   right: 0,
                   bottom: 0,

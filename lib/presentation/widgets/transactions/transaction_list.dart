@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/models/transaction_model.dart';
+import '../../../domain/transaction/entities/transaction.dart';
 import '../../helpers/expense_view_helpers.dart';
 import '../home/transaction_item.dart';
 
 class TransactionList extends StatelessWidget {
-  final List<TransactionModel> transactions;
-  final ValueChanged<TransactionModel> onEdit;
-  final ValueChanged<TransactionModel> onDelete;
+  final List<TransactionEntity> transactions;
+  final ValueChanged<TransactionEntity> onEdit;
+  final ValueChanged<TransactionEntity> onDelete;
 
   const TransactionList({
     super.key,

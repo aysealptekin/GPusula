@@ -5,6 +5,7 @@ import 'package:roadmap/domain/auth/usecases/login_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/logout_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/register_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/reset_password_usecase.dart';
+import 'package:roadmap/domain/auth/usecases/sign_in_with_google_usecase.dart';
 
 import 'auth_state.dart';
 
@@ -14,6 +15,7 @@ class AuthCubit extends Cubit<AuthState> {
   final ResetPasswordUseCase resetPasswordUseCase;
   final LogoutUseCase logoutUseCase;
   final ChangePasswordUseCase changePasswordUseCase;
+  final SignInWithGoogleUseCase signInWithGoogleUseCase;
 
   AuthCubit({
     required this.loginUseCase,
@@ -21,6 +23,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.resetPasswordUseCase,
     required this.logoutUseCase,
     required this.changePasswordUseCase,
+    required this.signInWithGoogleUseCase,
   }) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
@@ -96,7 +99,13 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> signInWithGoogle() async {
     emit(AuthLoading());
-    emit(AuthError('Google ile giris henuz hazir degil'));
+
+    try {
+      final user = await signInWithGoogleUseCase();
+      emit(Authenticated(user));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 
   void updateCurrentUserName(String name) {

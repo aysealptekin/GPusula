@@ -11,7 +11,7 @@ class RegistrationHeader extends StatelessWidget {
         Icon(Icons.person_add, size: 50, color: AppColors.inputIcon),
         SizedBox(height: 10),
         Text(
-          'Yeni Hesap OluÅŸtur',
+          'Yeni Hesap Oluştur',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 30,

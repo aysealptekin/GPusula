@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required String email, required String password});
+
+  Future<UserModel> signInWithGoogle();
 
   Future<UserModel> register({
     required String name,
@@ -24,12 +28,15 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
+  final GoogleSignIn? googleSignIn;
 
   AuthRemoteDataSourceImpl({
     firebase_auth.FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
+    GoogleSignIn? googleSignIn,
   }) : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-       firestore = firestore ?? FirebaseFirestore.instance;
+       firestore = firestore ?? FirebaseFirestore.instance,
+       googleSignIn = googleSignIn ?? (kIsWeb ? null : GoogleSignIn());
 
   @override
   Future<void> changePassword({
@@ -82,6 +89,57 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        final provider = firebase_auth.GoogleAuthProvider();
+        final userCredential = await firebaseAuth.signInWithPopup(provider);
+        final user = userCredential.user;
+
+        if (user != null) {
+          await _createUserProfile(
+            userId: user.uid,
+            name: user.displayName ?? '',
+            email: user.email ?? '',
+            photoUrl: user.photoURL,
+          );
+        }
+
+        return _userFromFirebaseUser(user);
+      }
+
+      final googleUser = await googleSignIn?.signIn();
+      if (googleUser == null) {
+        throw Exception('Google ile giriş iptal edildi');
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await firebaseAuth.signInWithCredential(
+        credential,
+      );
+      final user = userCredential.user;
+
+      if (user != null) {
+        await _createUserProfile(
+          userId: user.uid,
+          name: user.displayName ?? googleUser.displayName ?? '',
+          email: user.email ?? googleUser.email,
+          photoUrl: user.photoURL ?? googleUser.photoUrl,
+        );
+      }
+
+      return _userFromFirebaseUser(user);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
+    }
+  }
+
+  @override
   Future<UserModel> register({
     required String name,
     required String email,
@@ -117,6 +175,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
+    await googleSignIn?.signOut();
     await firebaseAuth.signOut();
   }
 
@@ -149,13 +208,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String userId,
     required String name,
     required String email,
+    String? photoUrl,
   }) async {
+    final profileData = <String, dynamic>{
+      'name': name,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+
+    if (photoUrl != null && photoUrl.trim().isNotEmpty) {
+      profileData['photoUrl'] = photoUrl;
+    }
+
     try {
-      await firestore.collection('users').doc(userId).set({
-        'name': name,
-        'email': email,
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      await firestore.collection('users').doc(userId).set(
+            profileData,
+            SetOptions(merge: true),
+          );
     } on FirebaseException {
       // Auth kaydi basariliysa profil dokumani rules nedeniyle yazilamasa da
       // kullanicinin kaydini bozmayalim.

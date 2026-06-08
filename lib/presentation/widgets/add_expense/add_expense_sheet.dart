@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../data/models/transaction_model.dart';
+import '../../../domain/transaction/entities/transaction.dart';
 import '../../cubit/expense/expense_cubit.dart';
 import '../../cubit/expense/expense_state.dart';
 import 'expense_save_button.dart';
@@ -11,7 +11,7 @@ import 'expense_form_fields.dart';
 import 'transaction_type_selector.dart';
 
 class AddExpenseSheet extends StatefulWidget {
-  final TransactionModel? transaction;
+  final TransactionEntity? transaction;
 
   const AddExpenseSheet({super.key, this.transaction});
 

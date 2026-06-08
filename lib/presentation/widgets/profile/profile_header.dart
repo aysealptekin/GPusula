@@ -27,10 +27,7 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 34,
-            backgroundImage: _profileImage(),
-          ),
+          CircleAvatar(radius: 34, backgroundImage: _profileImage()),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

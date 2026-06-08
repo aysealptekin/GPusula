@@ -86,10 +86,10 @@ class AccountService {
       profileData['photoUrl'] = photoUrl;
     }
 
-    await firestore.collection('users').doc(userId).set(
-          profileData,
-          SetOptions(merge: true),
-        );
+    await firestore
+        .collection('users')
+        .doc(userId)
+        .set(profileData, SetOptions(merge: true));
 
     await user?.updateDisplayName(name.trim());
     if (photoUrl != null) {

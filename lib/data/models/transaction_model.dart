@@ -1,25 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class TransactionModel {
-  final String id;
-  final String title;
-  final double amount;
-  final String category;
-  final String type;
-  final DateTime createdAt;
+import '../../domain/transaction/entities/transaction.dart';
 
+class TransactionModel extends TransactionEntity {
   const TransactionModel({
-    required this.id,
-    required this.title,
-    required this.amount,
-    required this.category,
-    required this.type,
-    required this.createdAt,
+    required super.id,
+    required super.title,
+    required super.amount,
+    required super.category,
+    required super.type,
+    required super.createdAt,
+    super.vibeStatus,
   });
-
-  bool get isIncome => type == 'income';
-
-  bool get isExpense => type == 'expense';
 
   factory TransactionModel.fromFirestore(
     QueryDocumentSnapshot<Map<String, dynamic>> document,
@@ -34,6 +26,7 @@ class TransactionModel {
       category: data['category'] ?? '',
       type: data['type'] ?? 'expense',
       createdAt: createdAt is Timestamp ? createdAt.toDate() : DateTime.now(),
+      vibeStatus: data['vibeStatus'] ?? 'pending',
     );
   }
 
@@ -44,6 +37,7 @@ class TransactionModel {
       'category': category,
       'type': type,
       'createdAt': Timestamp.fromDate(createdAt),
+      'vibeStatus': vibeStatus,
     };
   }
 }

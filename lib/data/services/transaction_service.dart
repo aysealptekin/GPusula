@@ -57,6 +57,16 @@ class TransactionService {
     });
   }
 
+  Future<void> updateVibeStatus({
+    required String userId,
+    required String transactionId,
+    required String vibeStatus,
+  }) {
+    return _transactionsRef(userId).doc(transactionId).update({
+      'vibeStatus': vibeStatus,
+    });
+  }
+
   Future<void> deleteTransaction({
     required String userId,
     required String transactionId,

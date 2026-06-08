@@ -35,8 +35,9 @@ class TransactionTypeSelector extends StatelessWidget {
           : null,
       style: ButtonStyle(
         foregroundColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.selected) ? Colors.black : Colors.white,
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.black
+              : Colors.white,
         ),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)

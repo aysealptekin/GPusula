@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../data/services/account_service.dart';
+import '../../domain/account/entities/user_profile.dart';
 import '../bloc/auth_cubit.dart';
 import '../bloc/auth_state.dart';
+import '../cubit/account/account_cubit.dart';
+import '../cubit/account/account_state.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../widgets/common/custom_bottom_nav.dart';
 import '../widgets/profile/edit_profile_sheet.dart';
@@ -21,8 +23,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _accountService = AccountService();
-
   Future<void> _clearTransactionHistory(String userId) async {
     final confirmed = await ProfileAccountDialogs.confirm(
       context: context,
@@ -34,7 +34,8 @@ class _ProfilePageState extends State<ProfilePage> {
     if (confirmed != true || !mounted) return;
 
     await _runAccountAction(
-      action: () => _accountService.clearTransactionHistory(userId),
+      action: () =>
+          context.read<AccountCubit>().clearTransactionHistory(userId),
       successMessage: 'Harcama geçmişi temizlendi',
     );
   }
@@ -44,12 +45,13 @@ class _ProfilePageState extends State<ProfilePage> {
     if (password == null || !mounted) return;
 
     await _runAccountAction(
-      action: () => _accountService.deleteCurrentUserAccount(
+      action: () => context.read<AccountCubit>().deleteCurrentUserAccount(
         password: password,
       ),
       successMessage: 'Hesap silindi',
       onSuccess: () {
         context.read<ExpenseCubit>().clear();
+        context.read<AccountCubit>().clear();
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.login,
@@ -95,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required List<int>? photoBytes,
   }) async {
     await _runAccountAction(
-      action: () => _accountService.updateProfile(
+      action: () => context.read<AccountCubit>().updateProfile(
         userId: userId,
         name: name,
         email: email,
@@ -108,35 +110,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     context.read<ExpenseCubit>().clear();
+    context.read<AccountCubit>().clear();
     await context.read<AuthCubit>().logout();
   }
 
   Future<void> _runAccountAction({
-    required Future<void> Function() action,
+    required Future<bool> Function() action,
     required String successMessage,
     VoidCallback? onSuccess,
   }) async {
-    try {
-      await action();
-      if (!mounted) return;
+    final succeeded = await action();
+    if (!mounted) return;
 
+    if (!succeeded) {
+      final message =
+          context.read<AccountCubit>().state.errorMessage ??
+          'İşlem tamamlanamadı';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(successMessage),
-          backgroundColor: AppColors.success,
-        ),
+        SnackBar(content: Text(message), backgroundColor: AppColors.error),
       );
-      onSuccess?.call();
-    } catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString()),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(successMessage),
+        backgroundColor: AppColors.success,
+      ),
+    );
+    onSuccess?.call();
   }
 
   @override
@@ -163,12 +165,17 @@ class _ProfilePageState extends State<ProfilePage> {
             ? state.user.id
             : firebaseUser?.uid;
 
-        return StreamBuilder<Map<String, dynamic>?>(
-          stream: userId == null
-              ? const Stream.empty()
-              : _accountService.watchUserProfile(userId),
-          builder: (context, snapshot) {
-            final profile = snapshot.data;
+        if (userId != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              context.read<AccountCubit>().watchUserProfile(userId);
+            }
+          });
+        }
+
+        return BlocBuilder<AccountCubit, AccountState>(
+          builder: (context, accountState) {
+            final profile = accountState.profile;
             final name = _profileName(state, firebaseUser, profile);
             final email = _profileEmail(state, firebaseUser, profile);
             final photoUrl = _profilePhotoUrl(firebaseUser, profile);
@@ -192,15 +199,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   onEditProfile: userId == null
                       ? () {}
                       : () => _showEditProfileSheet(
-                            userId: userId,
-                            name: name,
-                            email: email,
-                            photoUrl: photoUrl,
-                          ),
-                  onChangePassword: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.changePassword,
-                  ),
+                          userId: userId,
+                          name: name,
+                          email: email,
+                          photoUrl: photoUrl,
+                        ),
+                  onChangePassword: () =>
+                      Navigator.pushNamed(context, AppRoutes.changePassword),
                   onClearHistory: userId == null
                       ? () {}
                       : () => _clearTransactionHistory(userId),
@@ -219,9 +224,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String _profileName(
     AuthState state,
     firebase_auth.User? firebaseUser,
-    Map<String, dynamic>? profile,
+    UserProfile? profile,
   ) {
-    final name = profile?['name'] as String? ??
+    final name =
+        profile?.name ??
         (state is Authenticated ? state.user.name : null) ??
         firebaseUser?.displayName ??
         firebaseUser?.email?.split('@').first;
@@ -232,9 +238,9 @@ class _ProfilePageState extends State<ProfilePage> {
   String _profileEmail(
     AuthState state,
     firebase_auth.User? firebaseUser,
-    Map<String, dynamic>? profile,
+    UserProfile? profile,
   ) {
-    return profile?['email'] as String? ??
+    return profile?.email ??
         (state is Authenticated ? state.user.email : null) ??
         firebaseUser?.email ??
         '';
@@ -242,8 +248,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String? _profilePhotoUrl(
     firebase_auth.User? firebaseUser,
-    Map<String, dynamic>? profile,
+    UserProfile? profile,
   ) {
-    return profile?['photoUrl'] as String? ?? firebaseUser?.photoURL;
+    return profile?.photoUrl ?? firebaseUser?.photoURL;
   }
 }

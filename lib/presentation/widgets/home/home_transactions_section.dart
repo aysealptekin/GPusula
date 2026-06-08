@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/routes/app_routes.dart';
-import '../../../data/models/transaction_model.dart';
+import '../../../domain/transaction/entities/transaction.dart';
 import '../../cubit/expense/expense_state.dart';
 import '../../helpers/expense_view_helpers.dart';
 import '../common/empty_message.dart';
@@ -10,7 +10,7 @@ import 'transaction_item.dart';
 
 class HomeTransactionsSection extends StatelessWidget {
   final ExpenseState expenseState;
-  final List<TransactionModel> transactions;
+  final List<TransactionEntity> transactions;
 
   const HomeTransactionsSection({
     super.key,
@@ -32,15 +32,17 @@ class HomeTransactionsSection extends StatelessWidget {
         else if (transactions.isEmpty)
           const EmptyMessage(message: 'Henüz işlem eklenmedi')
         else
-          ...transactions.take(5).map(
-            (transaction) => TransactionItem(
-              title: transaction.title,
-              date: ExpenseViewHelpers.formatDate(transaction.createdAt),
-              amount: ExpenseViewHelpers.signedAmount(transaction),
-              icon: ExpenseViewHelpers.categoryIcon(transaction.category),
-              color: ExpenseViewHelpers.categoryColor(transaction.category),
-            ),
-          ),
+          ...transactions
+              .take(5)
+              .map(
+                (transaction) => TransactionItem(
+                  title: transaction.title,
+                  date: ExpenseViewHelpers.formatDate(transaction.createdAt),
+                  amount: ExpenseViewHelpers.signedAmount(transaction),
+                  icon: ExpenseViewHelpers.categoryIcon(transaction.category),
+                  color: ExpenseViewHelpers.categoryColor(transaction.category),
+                ),
+              ),
       ],
     );
   }

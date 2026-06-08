@@ -62,10 +62,7 @@ class ProfileSettingsList extends StatelessWidget {
             onTap: onClearHistory,
           ),
           const SizedBox(height: 28),
-          DangerZone(
-            onLogout: onLogout,
-            onDeleteAccount: onDeleteAccount,
-          ),
+          DangerZone(onLogout: onLogout, onDeleteAccount: onDeleteAccount),
         ],
       ),
     );
