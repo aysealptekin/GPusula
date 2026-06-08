@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../domain/expense/entities/expense.dart';
+import '../../data/models/transaction_model.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../cubit/expense/expense_state.dart';
-import '../helpers/expense_view_helpers.dart';
-import '../widgets/home/transaction_item.dart';
+import '../widgets/add_expense/add_expense_sheet.dart';
+import '../widgets/transactions/transaction_filter_bar.dart';
+import '../widgets/transactions/transaction_list.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -34,6 +35,67 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _initializedFromRoute = true;
   }
 
+  void _showEditSheet(TransactionModel transaction) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AddExpenseSheet(transaction: transaction),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(TransactionModel transaction) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1A1D24),
+          title: const Text(
+            'İşlem silinsin mi?',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            '${transaction.title} kaydı kalıcı olarak silinecek.',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Vazgeç'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'Sil',
+                style: TextStyle(color: Colors.redAccent),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final deleted = await context.read<ExpenseCubit>().deleteExpense(
+      transaction.id,
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(deleted ? 'İşlem silindi' : 'İşlem silinemedi'),
+        backgroundColor: deleted ? AppColors.success : AppColors.error,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +113,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
           final transactions = state is ExpenseLoaded
               ? state.expenses
-              : <Expense>[];
+              : <TransactionModel>[];
 
           if (transactions.isEmpty) {
             return const Center(
@@ -66,7 +128,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
           return Column(
             children: [
-              _CategoryFilterBar(
+              TransactionFilterBar(
                 selectedType: _selectedType,
                 selectedCategory: _selectedCategory,
                 onAllSelected: () {
@@ -89,35 +151,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 },
               ),
               Expanded(
-                child: filteredTransactions.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Bu filtrede işlem yok',
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: filteredTransactions.length,
-                        itemBuilder: (context, index) {
-                          final transaction = filteredTransactions[index];
-                          return TransactionItem(
-                            title: transaction.title,
-                            date: ExpenseViewHelpers.formatDate(
-                              transaction.createdAt,
-                            ),
-                            amount: ExpenseViewHelpers.signedAmount(
-                              transaction,
-                            ),
-                            icon: ExpenseViewHelpers.categoryIcon(
-                              transaction.category,
-                            ),
-                            color: ExpenseViewHelpers.categoryColor(
-                              transaction.category,
-                            ),
-                          );
-                        },
-                      ),
+                child: TransactionList(
+                  transactions: filteredTransactions,
+                  onEdit: _showEditSheet,
+                  onDelete: _confirmDelete,
+                ),
               ),
             ],
           );
@@ -126,7 +164,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  List<Expense> _filteredTransactions(List<Expense> transactions) {
+  List<TransactionModel> _filteredTransactions(
+    List<TransactionModel> transactions,
+  ) {
     if (_selectedType == 'income') {
       return transactions.where((transaction) => transaction.isIncome).toList();
     }
@@ -135,102 +175,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return transactions
           .where(
             (transaction) =>
-                transaction.isExpense && transaction.category == _selectedCategory,
+                transaction.isExpense &&
+                transaction.category == _selectedCategory,
           )
           .toList();
     }
 
     return transactions;
-  }
-}
-
-class _CategoryFilterBar extends StatelessWidget {
-  final String selectedType;
-  final String? selectedCategory;
-  final VoidCallback onAllSelected;
-  final VoidCallback onIncomeSelected;
-  final ValueChanged<String> onCategorySelected;
-
-  const _CategoryFilterBar({
-    required this.selectedType,
-    required this.selectedCategory,
-    required this.onAllSelected,
-    required this.onIncomeSelected,
-    required this.onCategorySelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 58,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        children: [
-          _FilterChipButton(
-            label: 'Tümü',
-            selected: selectedType == 'all',
-            icon: Icons.all_inclusive_rounded,
-            color: const Color(0xFF7B8FF7),
-            onSelected: onAllSelected,
-          ),
-          _FilterChipButton(
-            label: 'Gelenler',
-            selected: selectedType == 'income',
-            icon: Icons.payments_rounded,
-            color: Colors.greenAccent,
-            onSelected: onIncomeSelected,
-          ),
-          ...ExpenseViewHelpers.expenseCategories.map(
-            (category) => _FilterChipButton(
-              label: category,
-              selected:
-                  selectedType == 'expense' && selectedCategory == category,
-              icon: ExpenseViewHelpers.categoryIcon(category),
-              color: ExpenseViewHelpers.categoryColor(category),
-              onSelected: () => onCategorySelected(category),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterChipButton extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onSelected;
-
-  const _FilterChipButton({
-    required this.label,
-    required this.selected,
-    required this.icon,
-    required this.color,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        avatar: Icon(icon, size: 18, color: selected ? Colors.black : color),
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onSelected(),
-        selectedColor: const Color(0xFF7B8FF7),
-        backgroundColor: const Color(0xFF1A1D24),
-        labelStyle: TextStyle(
-          color: selected ? Colors.black : Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-        side: BorderSide(
-          color: selected ? const Color(0xFF7B8FF7) : Colors.white12,
-        ),
-      ),
-    );
   }
 }

@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../data/models/transaction_model.dart';
 import '../../cubit/expense/expense_cubit.dart';
 import '../../cubit/expense/expense_state.dart';
+import 'expense_save_button.dart';
 import 'expense_category_selector.dart';
 import 'expense_form_fields.dart';
+import 'transaction_type_selector.dart';
 
 class AddExpenseSheet extends StatefulWidget {
-  const AddExpenseSheet({super.key});
+  final TransactionModel? transaction;
+
+  const AddExpenseSheet({super.key, this.transaction});
 
   @override
   State<AddExpenseSheet> createState() => _AddExpenseSheetState();
@@ -20,11 +25,28 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   String _selectedCategory = 'Yemek';
   String _selectedType = 'expense';
 
+  bool get _isEditing => widget.transaction != null;
+
   bool get _isIncome => _selectedType == 'income';
+
+  @override
+  void initState() {
+    super.initState();
+
+    final transaction = widget.transaction;
+    if (transaction == null) return;
+
+    _nameController.text = transaction.title;
+    _amountController.text = ThousandsSeparatorInputFormatter.formatAmount(
+      transaction.amount,
+    );
+    _selectedType = transaction.type;
+    _selectedCategory = transaction.isIncome ? 'Yemek' : transaction.category;
+  }
 
   Future<void> _saveExpense() async {
     final title = _nameController.text.trim();
-    final amountText = _amountController.text.trim().replaceAll(',', '.');
+    final amountText = _amountController.text.trim().replaceAll(',', '');
     final amount = double.tryParse(amountText);
 
     if (title.isEmpty || amount == null || amount <= 0) {
@@ -37,19 +59,31 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
       return;
     }
 
-    final saved = await context.read<ExpenseCubit>().addExpense(
-      title: title,
-      amount: amount,
-      category: _isIncome ? 'Gelir' : _selectedCategory,
-      type: _selectedType,
-    );
+    final category = _isIncome ? 'Gelir' : _selectedCategory;
+    final cubit = context.read<ExpenseCubit>();
+    final saved = _isEditing
+        ? await cubit.updateExpense(
+            expenseId: widget.transaction!.id,
+            title: title,
+            amount: amount,
+            category: category,
+            type: _selectedType,
+          )
+        : await cubit.addExpense(
+            title: title,
+            amount: amount,
+            category: category,
+            type: _selectedType,
+          );
 
     if (!mounted) return;
 
     if (!saved) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İşlem kaydedilemedi'),
+        SnackBar(
+          content: Text(
+            _isEditing ? 'İşlem güncellenemedi' : 'İşlem kaydedilemedi',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -59,10 +93,14 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_isIncome ? 'Gelir başarıyla eklendi' : 'Harcama başarıyla eklendi'),
+        content: Text(_isEditing ? 'İşlem güncellendi' : _successMessage()),
         backgroundColor: AppColors.success,
       ),
     );
+  }
+
+  String _successMessage() {
+    return _isIncome ? 'Gelir başarıyla eklendi' : 'Harcama başarıyla eklendi';
   }
 
   @override
@@ -89,7 +127,11 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                _isIncome ? 'Gelir Detayı' : 'Harcama Detayı',
+                _isEditing
+                    ? 'İşlemi Düzenle'
+                    : _isIncome
+                    ? 'Gelir Detayı'
+                    : 'Harcama Detayı',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
@@ -98,37 +140,10 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 ),
               ),
               const SizedBox(height: 20),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: 'expense',
-                    label: Text('Gider'),
-                    icon: Icon(Icons.remove_circle_outline),
-                  ),
-                  ButtonSegment(
-                    value: 'income',
-                    label: Text('Gelir'),
-                    icon: Icon(Icons.add_circle_outline),
-                  ),
-                ],
-                selected: {_selectedType},
-                onSelectionChanged: isSaving
-                    ? null
-                    : (selection) {
-                        setState(() => _selectedType = selection.first);
-                      },
-                style: ButtonStyle(
-                  foregroundColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.selected)
-                        ? Colors.black
-                        : Colors.white,
-                  ),
-                  backgroundColor: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.selected)
-                        ? AppColors.primarySoft
-                        : Colors.white10,
-                  ),
-                ),
+              TransactionTypeSelector(
+                selectedType: _selectedType,
+                enabled: !isSaving,
+                onChanged: (type) => setState(() => _selectedType = type),
               ),
               const SizedBox(height: 25),
               if (!_isIncome)
@@ -145,29 +160,11 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 amountController: _amountController,
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: isSaving ? null : _saveExpense,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primarySoft,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: isSaving
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
-                    : Icon(
-                        _isIncome ? Icons.add_circle_outline : Icons.add,
-                        size: 35,
-                        color: Colors.black,
-                      ),
+              ExpenseSaveButton(
+                isSaving: isSaving,
+                isEditing: _isEditing,
+                isIncome: _isIncome,
+                onPressed: _saveExpense,
               ),
             ],
           ),

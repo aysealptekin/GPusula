@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/constants/app_colors.dart';
 
 class ExpenseCategorySelector extends StatelessWidget {
   final String selectedCategory;
   final Function(String) onCategorySelected;
 
-  // Mevcut kategorilerimiz
-  final List<Map<String, dynamic>> categories = [
+  final List<Map<String, dynamic>> categories = const [
     {'name': 'Yemek', 'icon': Icons.restaurant},
     {'name': 'Market', 'icon': Icons.shopping_cart},
     {'name': 'Ulaşım', 'icon': Icons.directions_bus},
@@ -14,7 +14,7 @@ class ExpenseCategorySelector extends StatelessWidget {
     {'name': 'Diğer', 'icon': Icons.more_horiz},
   ];
 
-  ExpenseCategorySelector({
+  const ExpenseCategorySelector({
     super.key,
     required this.selectedCategory,
     required this.onCategorySelected,
@@ -32,7 +32,7 @@ class ExpenseCategorySelector extends StatelessWidget {
           final isSelected = selectedCategory == cat['name'];
 
           return GestureDetector(
-            onTap: () => onCategorySelected(cat['name']),
+            onTap: () => onCategorySelected(cat['name'] as String),
             child: Container(
               width: 70,
               margin: const EdgeInsets.only(right: 15),
@@ -44,12 +44,12 @@ class ExpenseCategorySelector extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    cat['icon'],
+                    cat['icon'] as IconData,
                     color: isSelected ? Colors.black : Colors.white,
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    cat['name'],
+                    cat['name'] as String,
                     style: TextStyle(
                       fontSize: 12,
                       color: isSelected ? Colors.black : Colors.white,

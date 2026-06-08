@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../models/user_model.dart';
@@ -22,9 +23,13 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firestore;
 
-  AuthRemoteDataSourceImpl({firebase_auth.FirebaseAuth? firebaseAuth})
-    : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
+  AuthRemoteDataSourceImpl({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  }) : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+       firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<void> changePassword({
@@ -95,7 +100,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await credential.user?.updateDisplayName(name.trim());
       await credential.user?.reload();
 
-      return _userFromFirebaseUser(firebaseAuth.currentUser ?? credential.user);
+      final user = firebaseAuth.currentUser ?? credential.user;
+      if (user != null) {
+        await _createUserProfile(
+          userId: user.uid,
+          name: name.trim(),
+          email: email.trim(),
+        );
+      }
+
+      return _userFromFirebaseUser(user);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw Exception(_authErrorMessage(e));
     }
@@ -129,6 +143,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       email: user.email ?? '',
       name: user.displayName ?? user.email?.split('@').first ?? '',
     );
+  }
+
+  Future<void> _createUserProfile({
+    required String userId,
+    required String name,
+    required String email,
+  }) async {
+    try {
+      await firestore.collection('users').doc(userId).set({
+        'name': name,
+        'email': email,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } on FirebaseException {
+      // Auth kaydi basariliysa profil dokumani rules nedeniyle yazilamasa da
+      // kullanicinin kaydini bozmayalim.
+    }
   }
 
   String _authErrorMessage(firebase_auth.FirebaseAuthException error) {

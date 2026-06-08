@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class ProfileHeader extends StatelessWidget {
   final String userName;
   final String email;
+  final String? photoUrl;
 
-  const ProfileHeader({super.key, required this.userName, required this.email});
+  const ProfileHeader({
+    super.key,
+    required this.userName,
+    required this.email,
+    this.photoUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +27,9 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 34,
-            backgroundImage: AssetImage('assets/merto1.png'),
+            backgroundImage: _profileImage(),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -49,5 +55,14 @@ class ProfileHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  ImageProvider _profileImage() {
+    final url = photoUrl;
+    if (url != null && url.trim().isNotEmpty) {
+      return NetworkImage(url);
+    }
+
+    return const AssetImage('assets/merto1.png');
   }
 }

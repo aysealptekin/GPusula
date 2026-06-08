@@ -24,13 +24,13 @@ class DangerZone extends StatelessWidget {
         children: [
           _buildDangerButton(
             icon: Icons.logout_rounded,
-            label: "Cikis Yap",
+            label: "Çıkış Yap",
             onPressed: onLogout,
           ),
           const SizedBox(height: 12),
           _buildDangerButton(
             icon: Icons.delete_forever_rounded,
-            label: "Hesabi Sil",
+            label: "Hesabı Sil",
             onPressed: onDeleteAccount,
           ),
         ],

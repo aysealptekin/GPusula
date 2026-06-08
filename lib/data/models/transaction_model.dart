@@ -1,24 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../domain/expense/entities/expense.dart';
+class TransactionModel {
+  final String id;
+  final String title;
+  final double amount;
+  final String category;
+  final String type;
+  final DateTime createdAt;
 
-class ExpenseModel extends Expense {
-  const ExpenseModel({
-    required super.id,
-    required super.title,
-    required super.amount,
-    required super.category,
-    required super.type,
-    required super.createdAt,
+  const TransactionModel({
+    required this.id,
+    required this.title,
+    required this.amount,
+    required this.category,
+    required this.type,
+    required this.createdAt,
   });
 
-  factory ExpenseModel.fromFirestore(
+  bool get isIncome => type == 'income';
+
+  bool get isExpense => type == 'expense';
+
+  factory TransactionModel.fromFirestore(
     QueryDocumentSnapshot<Map<String, dynamic>> document,
   ) {
     final data = document.data();
     final createdAt = data['createdAt'];
 
-    return ExpenseModel(
+    return TransactionModel(
       id: document.id,
       title: data['title'] ?? '',
       amount: (data['amount'] as num?)?.toDouble() ?? 0,

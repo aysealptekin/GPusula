@@ -4,20 +4,139 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
+import '../../data/services/account_service.dart';
 import '../bloc/auth_cubit.dart';
 import '../bloc/auth_state.dart';
+import '../cubit/expense/expense_cubit.dart';
 import '../widgets/common/custom_bottom_nav.dart';
-import '../widgets/profile/danger_zone.dart';
-import '../widgets/profile/profile_header.dart';
-import '../widgets/profile/setting_tile.dart';
+import '../widgets/profile/edit_profile_sheet.dart';
+import '../widgets/profile/profile_account_dialogs.dart';
+import '../widgets/profile/profile_settings_list.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-  void _showFeatureNotReadyMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Bu ozellik henuz hazir degil")),
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _accountService = AccountService();
+
+  Future<void> _clearTransactionHistory(String userId) async {
+    final confirmed = await ProfileAccountDialogs.confirm(
+      context: context,
+      title: 'Harcama geçmişi silinsin mi?',
+      message: 'Tüm işlem kayıtların kalıcı olarak silinecek.',
+      actionText: 'Temizle',
     );
+
+    if (confirmed != true || !mounted) return;
+
+    await _runAccountAction(
+      action: () => _accountService.clearTransactionHistory(userId),
+      successMessage: 'Harcama geçmişi temizlendi',
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    final password = await ProfileAccountDialogs.askPasswordForDelete(context);
+    if (password == null || !mounted) return;
+
+    await _runAccountAction(
+      action: () => _accountService.deleteCurrentUserAccount(
+        password: password,
+      ),
+      successMessage: 'Hesap silindi',
+      onSuccess: () {
+        context.read<ExpenseCubit>().clear();
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (route) => false,
+        );
+      },
+    );
+  }
+
+  void _showEditProfileSheet({
+    required String userId,
+    required String name,
+    required String email,
+    required String? photoUrl,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: EditProfileSheet(
+          name: name,
+          email: email,
+          photoUrl: photoUrl,
+          onSave: (updatedName, photoBytes) => _updateProfile(
+            userId: userId,
+            name: updatedName,
+            email: email,
+            photoBytes: photoBytes,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateProfile({
+    required String userId,
+    required String name,
+    required String email,
+    required List<int>? photoBytes,
+  }) async {
+    await _runAccountAction(
+      action: () => _accountService.updateProfile(
+        userId: userId,
+        name: name,
+        email: email,
+        photoBytes: photoBytes,
+      ),
+      successMessage: 'Profil güncellendi',
+      onSuccess: () => context.read<AuthCubit>().updateCurrentUserName(name),
+    );
+  }
+
+  Future<void> _logout() async {
+    context.read<ExpenseCubit>().clear();
+    await context.read<AuthCubit>().logout();
+  }
+
+  Future<void> _runAccountAction({
+    required Future<void> Function() action,
+    required String successMessage,
+    VoidCallback? onSuccess,
+  }) async {
+    try {
+      await action();
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(successMessage),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      onSuccess?.call();
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -39,104 +158,92 @@ class ProfilePage extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final isLoading = state is AuthLoading;
         final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
-        final userName = state is Authenticated
-            ? state.user.name
-            : firebaseUser?.displayName ?? firebaseUser?.email?.split('@').first;
-        final email = state is Authenticated
-            ? state.user.email
-            : firebaseUser?.email ?? '';
-        final displayName = (userName == null || userName.trim().isEmpty)
-            ? 'Kullanıcı'
-            : userName.trim();
+        final userId = state is Authenticated
+            ? state.user.id
+            : firebaseUser?.uid;
 
-        return Scaffold(
-          backgroundColor: AppColors.arkaplan,
-          appBar: AppBar(
-            backgroundColor: AppColors.arkaplan,
-            elevation: 0,
-            title: const Text(
-              "Profilim",
-              style: TextStyle(color: Colors.white),
-            ),
-            centerTitle: true,
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ProfileHeader(userName: displayName, email: email),
-                  const SizedBox(height: 24),
+        return StreamBuilder<Map<String, dynamic>?>(
+          stream: userId == null
+              ? const Stream.empty()
+              : _accountService.watchUserProfile(userId),
+          builder: (context, snapshot) {
+            final profile = snapshot.data;
+            final name = _profileName(state, firebaseUser, profile);
+            final email = _profileEmail(state, firebaseUser, profile);
+            final photoUrl = _profilePhotoUrl(firebaseUser, profile);
 
-                  const _SectionTitle("Hesap"),
-                  const SizedBox(height: 12),
-
-                  SettingsTile(
-                    icon: Icons.edit_outlined,
-                    title: "Profili Duzenle",
-                    subtitle: "Kisisel bilgilerini guncelle",
-                    color: const Color(0xFF7B8FF7),
-                    onTap: () => _showFeatureNotReadyMessage(context),
-                  ),
-                  SettingsTile(
-                    icon: Icons.lock_outline,
-                    title: "Sifre Degistir",
-                    subtitle: "Hesabinin guvenligini guncelle",
-                    color: Colors.lightBlueAccent,
-                    onTap: isLoading
-                        ? () {}
-                        : () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.changePassword,
-                          ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  const _SectionTitle("Veri Yonetimi"),
-                  const SizedBox(height: 12),
-
-                  SettingsTile(
-                    icon: Icons.delete_outline,
-                    title: "Harcama Gecmisini Temizle",
-                    subtitle: "Tum islem kayitlarini sil",
-                    color: Colors.redAccent,
-                    onTap: () => _showFeatureNotReadyMessage(context),
-                  ),
-
-                  const SizedBox(height: 28),
-                  DangerZone(
-                    onLogout: isLoading
-                        ? () {}
-                        : () => context.read<AuthCubit>().logout(),
-                    onDeleteAccount: () => _showFeatureNotReadyMessage(context),
-                  ),
-                ],
+            return Scaffold(
+              backgroundColor: AppColors.arkaplan,
+              appBar: AppBar(
+                backgroundColor: AppColors.arkaplan,
+                elevation: 0,
+                title: const Text(
+                  'Profilim',
+                  style: TextStyle(color: Colors.white),
+                ),
+                centerTitle: true,
               ),
-            ),
-          ),
-          bottomNavigationBar: const CustomBottomNav(currentIndex: 3),
+              body: SafeArea(
+                child: ProfileSettingsList(
+                  userName: name,
+                  email: email,
+                  photoUrl: photoUrl,
+                  onEditProfile: userId == null
+                      ? () {}
+                      : () => _showEditProfileSheet(
+                            userId: userId,
+                            name: name,
+                            email: email,
+                            photoUrl: photoUrl,
+                          ),
+                  onChangePassword: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.changePassword,
+                  ),
+                  onClearHistory: userId == null
+                      ? () {}
+                      : () => _clearTransactionHistory(userId),
+                  onLogout: _logout,
+                  onDeleteAccount: _deleteAccount,
+                ),
+              ),
+              bottomNavigationBar: const CustomBottomNav(currentIndex: 3),
+            );
+          },
         );
       },
     );
   }
-}
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
+  String _profileName(
+    AuthState state,
+    firebase_auth.User? firebaseUser,
+    Map<String, dynamic>? profile,
+  ) {
+    final name = profile?['name'] as String? ??
+        (state is Authenticated ? state.user.name : null) ??
+        firebaseUser?.displayName ??
+        firebaseUser?.email?.split('@').first;
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+    return (name == null || name.trim().isEmpty) ? 'Kullanıcı' : name.trim();
+  }
+
+  String _profileEmail(
+    AuthState state,
+    firebase_auth.User? firebaseUser,
+    Map<String, dynamic>? profile,
+  ) {
+    return profile?['email'] as String? ??
+        (state is Authenticated ? state.user.email : null) ??
+        firebaseUser?.email ??
+        '';
+  }
+
+  String? _profilePhotoUrl(
+    firebase_auth.User? firebaseUser,
+    Map<String, dynamic>? profile,
+  ) {
+    return profile?['photoUrl'] as String? ?? firebaseUser?.photoURL;
   }
 }

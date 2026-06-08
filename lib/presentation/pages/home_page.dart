@@ -3,20 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
-import '../../domain/expense/entities/expense.dart';
+import '../../data/models/transaction_model.dart';
 import '../bloc/auth_cubit.dart';
 import '../bloc/auth_state.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../cubit/expense/expense_state.dart';
-import '../helpers/expense_view_helpers.dart';
 import '../widgets/add_expense/add_expense_sheet.dart';
 import '../widgets/common/custom_bottom_nav.dart';
-import '../widgets/home/budget_category_card.dart';
-import '../widgets/home/goal_card.dart';
 import '../widgets/home/home_balance_card.dart';
+import '../widgets/home/home_categories_section.dart';
+import '../widgets/home/home_goals_section.dart';
 import '../widgets/home/home_header.dart';
-import '../widgets/home/transaction_item.dart';
+import '../widgets/home/home_transactions_section.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -61,7 +59,7 @@ class HomePage extends StatelessWidget {
       builder: (context, expenseState) {
         final transactions = expenseState is ExpenseLoaded
             ? expenseState.expenses
-            : <Expense>[];
+            : <TransactionModel>[];
         final expenses = transactions
             .where((transaction) => transaction.isExpense)
             .toList();
@@ -84,96 +82,17 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 25),
                   HomeBalanceCard(totalAmount: totalExpense),
                   const SizedBox(height: 30),
-                  _SectionHeader(
-                    title: 'Son İşlemler',
-                    onSeeAll: () =>
-                        Navigator.pushNamed(context, AppRoutes.transactions),
+                  HomeTransactionsSection(
+                    expenseState: expenseState,
+                    transactions: transactions,
                   ),
-                  const SizedBox(height: 15),
-                  if (expenseState is ExpenseLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (transactions.isEmpty)
-                    const _EmptyState(message: 'Henüz işlem eklenmedi')
-                  else
-                    ...transactions.take(5).map(
-                      (transaction) => TransactionItem(
-                        title: transaction.title,
-                        date: ExpenseViewHelpers.formatDate(
-                          transaction.createdAt,
-                        ),
-                        amount: ExpenseViewHelpers.signedAmount(transaction),
-                        icon: ExpenseViewHelpers.categoryIcon(
-                          transaction.category,
-                        ),
-                        color: ExpenseViewHelpers.categoryColor(
-                          transaction.category,
-                        ),
-                      ),
-                    ),
                   const SizedBox(height: 30),
-                  _SectionHeader(
-                    title: 'Kategoriler',
-                    onSeeAll: () =>
-                        Navigator.pushNamed(context, AppRoutes.categories),
+                  HomeCategoriesSection(
+                    totalExpense: totalExpense,
+                    categoryTotals: categoryTotals,
                   ),
-                  const SizedBox(height: 15),
-                  if (categoryTotals.isEmpty)
-                    const _EmptyState(message: 'Kategori özeti için harcama ekle')
-                  else
-                    ...categoryTotals.entries.map(
-                      (entry) => BudgetCategoryCard(
-                        title: entry.key,
-                        amount: '${entry.value.toStringAsFixed(2)} TL',
-                        progress: totalExpense == 0
-                            ? 0
-                            : (entry.value / totalExpense)
-                                  .clamp(0.0, 1.0)
-                                  .toDouble(),
-                        status: 'GİDER',
-                        statusColor: ExpenseViewHelpers.categoryColor(
-                          entry.key,
-                        ),
-                        icon: ExpenseViewHelpers.categoryIcon(entry.key),
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.transactions,
-                          arguments: entry.key,
-                        ),
-                      ),
-                    ),
                   const SizedBox(height: 30),
-                  const Text(
-                    'Birikim Hedefleri',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: GoalCard(
-                          title: 'Tasarruf',
-                          amount: '12,500 TL',
-                          progress: 0.72,
-                          icon: Icons.wallet,
-                          color: Colors.pinkAccent,
-                        ),
-                      ),
-                      SizedBox(width: 15),
-                      Expanded(
-                        child: GoalCard(
-                          title: 'Tatil',
-                          amount: '8,200 TL',
-                          progress: 0.45,
-                          icon: Icons.flight,
-                          color: Colors.orangeAccent,
-                        ),
-                      ),
-                    ],
-                  ),
+                  const HomeGoalsSection(),
                   const SizedBox(height: 50),
                 ],
               ),
@@ -190,65 +109,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Map<String, double> _categoryTotals(List<Expense> expenses) {
+  Map<String, double> _categoryTotals(List<TransactionModel> expenses) {
     final totals = <String, double>{};
     for (final expense in expenses) {
-      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+      totals[expense.category] =
+          (totals[expense.category] ?? 0) + expense.amount;
     }
     return totals;
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final VoidCallback onSeeAll;
-
-  const _SectionHeader({required this.title, required this.onSeeAll});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        InkWell(
-          onTap: onSeeAll,
-          child: const Text(
-            'Tümünü Gör',
-            style: TextStyle(color: Color(0xFF7B8FF7)),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final String message;
-
-  const _EmptyState({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        message,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white70),
-      ),
-    );
   }
 }

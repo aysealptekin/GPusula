@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:roadmap/domain/auth/entities/user.dart' as app_user;
 import 'package:roadmap/domain/auth/usecases/change_password_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/login_usecase.dart';
 import 'package:roadmap/domain/auth/usecases/logout_usecase.dart';
@@ -96,5 +97,20 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signInWithGoogle() async {
     emit(AuthLoading());
     emit(AuthError('Google ile giris henuz hazir degil'));
+  }
+
+  void updateCurrentUserName(String name) {
+    final currentState = state;
+    if (currentState is! Authenticated) return;
+
+    emit(
+      Authenticated(
+        app_user.User(
+          id: currentState.user.id,
+          email: currentState.user.email,
+          name: name,
+        ),
+      ),
+    );
   }
 }

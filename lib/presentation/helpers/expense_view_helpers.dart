@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/expense/entities/expense.dart';
+import '../../data/models/transaction_model.dart';
 
 class ExpenseViewHelpers {
   static const expenseCategories = [
@@ -23,7 +23,7 @@ class ExpenseViewHelpers {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
-  static String signedAmount(Expense transaction) {
+  static String signedAmount(TransactionModel transaction) {
     final prefix = transaction.isIncome ? '+' : '-';
     return '$prefix${transaction.amount.toStringAsFixed(2)} TL';
   }

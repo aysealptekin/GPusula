@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../domain/expense/entities/expense.dart';
+import '../../data/models/transaction_model.dart';
 import '../cubit/expense/expense_cubit.dart';
 import '../cubit/expense/expense_state.dart';
 import '../helpers/expense_view_helpers.dart';
@@ -29,7 +29,7 @@ class CategoriesPage extends StatelessWidget {
 
           final transactions = state is ExpenseLoaded
               ? state.expenses
-              : <Expense>[];
+              : <TransactionModel>[];
           final expenses = transactions
               .where((transaction) => transaction.isExpense)
               .toList();
@@ -65,7 +65,7 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 
-  Map<String, double> _categoryTotals(List<Expense> expenses) {
+  Map<String, double> _categoryTotals(List<TransactionModel> expenses) {
     final totals = <String, double>{};
     for (final expense in expenses) {
       totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
