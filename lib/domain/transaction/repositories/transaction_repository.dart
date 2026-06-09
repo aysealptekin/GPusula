@@ -30,4 +30,6 @@ abstract class TransactionRepository {
     required String transactionId,
     required String vibeStatus,
   });
+
+  Future<void> resetVibeStatuses(String userId);
 }

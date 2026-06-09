@@ -40,6 +40,204 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> _resetVibeHistory() async {
+    final confirmed = await ProfileAccountDialogs.confirm(
+      context: context,
+      title: 'Vibe geçmişi sıfırlansın mı?',
+      message:
+          'Tüm Vibe Match ve Vibe Miss kararların yeniden beklemeye alınacak.',
+      actionText: 'Sıfırla',
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final succeeded = await context.read<ExpenseCubit>().resetVibeHistory();
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          succeeded ? 'Vibe geçmişi sıfırlandı' : 'Vibe geçmişi sıfırlanamadı',
+        ),
+        backgroundColor: succeeded ? AppColors.success : AppColors.error,
+      ),
+    );
+  }
+
+  void _showVibeScheduleDialog() {
+    final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+    final authState = context.read<AuthCubit>().state;
+    final userId = authState is Authenticated
+        ? authState.user.id
+        : firebaseUser?.uid;
+    if (userId == null) return;
+
+    final profile = context.read<AccountCubit>().state.profile;
+    var selectedDay = (profile?.vibeCheckDay ?? 28).clamp(1, 28).toInt();
+    var selectedSecondDay = (profile?.vibeCheckSecondDay ?? 15)
+        .clamp(1, 28)
+        .toInt();
+    var selectedFrequency = (profile?.vibeCheckFrequency ?? 1)
+        .clamp(1, 2)
+        .toInt();
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final hasDuplicateDays =
+                selectedFrequency == 2 && selectedDay == selectedSecondDay;
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1A1D24),
+              title: const Text(
+                'Vibe Check Gününü Değiştir',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      key: ValueKey('frequency-$selectedFrequency'),
+                      initialValue: selectedFrequency,
+                      dropdownColor: const Color(0xFF1A1D24),
+                      decoration: const InputDecoration(
+                        labelText: 'Sıklık',
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 1, child: Text('Ayda 1 kez')),
+                        DropdownMenuItem(value: 2, child: Text('Ayda 2 kez')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() {
+                            selectedFrequency = value;
+                            if (selectedFrequency == 2 &&
+                                selectedDay == selectedSecondDay) {
+                              selectedSecondDay = selectedDay == 28
+                                  ? selectedDay - 1
+                                  : selectedDay + 1;
+                            }
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(
+                        'first-day-$selectedDay-$selectedFrequency',
+                      ),
+                      initialValue: selectedDay,
+                      dropdownColor: const Color(0xFF1A1D24),
+                      decoration: const InputDecoration(
+                        labelText: 'Gün',
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: List.generate(
+                        28,
+                        (index) => DropdownMenuItem(
+                          value: index + 1,
+                          child: Text('${index + 1}. gün'),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() => selectedDay = value);
+                        }
+                      },
+                    ),
+                    if (selectedFrequency == 2) ...[
+                      const SizedBox(height: 14),
+                      DropdownButtonFormField<int>(
+                        key: ValueKey('second-day-$selectedSecondDay'),
+                        initialValue: selectedSecondDay,
+                        dropdownColor: const Color(0xFF1A1D24),
+                        decoration: const InputDecoration(
+                          labelText: 'İkinci gün',
+                          labelStyle: TextStyle(color: Colors.white70),
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        items: List.generate(
+                          28,
+                          (index) => DropdownMenuItem(
+                            value: index + 1,
+                            child: Text('${index + 1}. gün'),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setDialogState(() => selectedSecondDay = value);
+                          }
+                        },
+                      ),
+                      if (hasDuplicateDays) ...[
+                        const SizedBox(height: 8),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'İki kontrol günü aynı olamaz.',
+                            style: TextStyle(
+                              color: AppColors.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Vazgeç'),
+                ),
+                TextButton(
+                  onPressed: hasDuplicateDays
+                      ? null
+                      : () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(context);
+                          final saved = await this.context
+                              .read<AccountCubit>()
+                              .updateVibeSchedule(
+                                userId: userId,
+                                day: selectedDay,
+                                secondDay: selectedFrequency == 2
+                                    ? selectedSecondDay
+                                    : selectedDay,
+                                frequency: selectedFrequency,
+                              );
+                          if (!mounted) return;
+                          navigator.pop();
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                saved
+                                    ? 'Vibe Check günü güncellendi'
+                                    : 'Vibe Check günü güncellenemedi',
+                              ),
+                              backgroundColor: saved
+                                  ? AppColors.success
+                                  : AppColors.error,
+                            ),
+                          );
+                        },
+                  child: const Text('Kaydet'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _deleteAccount() async {
     final password = await ProfileAccountDialogs.askPasswordForDelete(context);
     if (password == null || !mounted) return;
@@ -206,9 +404,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                   onChangePassword: () =>
                       Navigator.pushNamed(context, AppRoutes.changePassword),
+                  onChangeVibeSchedule: _showVibeScheduleDialog,
                   onClearHistory: userId == null
                       ? () {}
                       : () => _clearTransactionHistory(userId),
+                  onResetVibeHistory: _resetVibeHistory,
                   onLogout: _logout,
                   onDeleteAccount: _deleteAccount,
                 ),

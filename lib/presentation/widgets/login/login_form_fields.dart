@@ -27,7 +27,7 @@ class LoginFormFields extends StatelessWidget {
 
         CustomTextField(
           controller: passwordController,
-          hintText: "Sifre",
+          hintText: "Şifre",
           icon: Icons.lock_outline,
           isPassword: true,
           validator: AppValidators.sifreDogrula,

@@ -1,61 +1,121 @@
 import 'package:flutter/material.dart';
 
-//en altta duran 2 hedef karesi
-class GoalCard extends StatelessWidget {
-  final String title;
-  final String amount;
-  final double progress;
-  final IconData icon;
-  final Color color;
+import 'savings_goal_view_data.dart';
 
-  const GoalCard({
-    super.key,
-    required this.title,
-    required this.amount,
-    required this.progress,
-    required this.icon,
-    required this.color,
-  });
+class GoalCard extends StatelessWidget {
+  final SavingsGoalViewData goal;
+  final VoidCallback onTap;
+
+  const GoalCard({super.key, required this.goal, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(28),
+    return Material(
+      color: const Color(0xFF1A1D24),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(goal.icon, color: goal.color, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      goal.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '%${(goal.progress.clamp(0, 1) * 100).toStringAsFixed(0)}',
+                    style: TextStyle(
+                      color: goal.color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.edit_rounded, color: Colors.white38, size: 18),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: goal.progress.clamp(0.0, 1.0).toDouble(),
+                  backgroundColor: Colors.white10,
+                  color: goal.color,
+                  minHeight: 7,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _GoalMetric(
+                      label: 'Hedef',
+                      value: '${goal.targetAmount.toStringAsFixed(0)} TL',
+                    ),
+                  ),
+                  Expanded(
+                    child: _GoalMetric(
+                      label: 'Aktarılan',
+                      value: '${goal.savedAmount.toStringAsFixed(0)} TL',
+                    ),
+                  ),
+                  Expanded(
+                    child: _GoalMetric(
+                      label: 'Kalan',
+                      value: '${goal.remainingAmount.toStringAsFixed(0)} TL',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 15),
-          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-          Text(
-            amount,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+    );
+  }
+}
+
+class _GoalMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _GoalMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white54, fontSize: 11),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 15),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.white10,
-              color: color,
-              minHeight: 4,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            '${(progress * 100).toInt()}%',
-            style: const TextStyle(color: Colors.grey, fontSize: 10),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

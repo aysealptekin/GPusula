@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 
 import 'goal_card.dart';
+import 'savings_goal_view_data.dart';
 
 class HomeGoalsSection extends StatelessWidget {
-  const HomeGoalsSection({super.key});
+  final List<SavingsGoalViewData> goals;
+  final ValueChanged<int> onGoalTap;
+
+  const HomeGoalsSection({
+    super.key,
+    required this.goals,
+    required this.onGoalTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Birikim Hedefleri',
           style: TextStyle(
             color: Colors.white,
@@ -18,30 +26,39 @@ class HomeGoalsSection extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
+        const SizedBox(height: 15),
+        if (goals.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1D24),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.savings_rounded, color: Colors.white38),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Henüz birikim hedefi eklemedin.',
+                    style: TextStyle(color: Colors.white60),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...goals.asMap().entries.map(
+            (entry) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
               child: GoalCard(
-                title: 'Tasarruf',
-                amount: '12,500 TL',
-                progress: 0.72,
-                icon: Icons.wallet,
-                color: Colors.pinkAccent,
+                goal: entry.value,
+                onTap: () => onGoalTap(entry.key),
               ),
             ),
-            SizedBox(width: 15),
-            Expanded(
-              child: GoalCard(
-                title: 'Tatil',
-                amount: '8,200 TL',
-                progress: 0.45,
-                icon: Icons.flight,
-                color: Colors.orangeAccent,
-              ),
-            ),
-          ],
-        ),
+          ),
       ],
     );
   }

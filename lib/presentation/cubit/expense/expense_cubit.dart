@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/transaction/entities/transaction.dart';
 import '../../../domain/transaction/usecases/add_transaction_usecase.dart';
 import '../../../domain/transaction/usecases/delete_transaction_usecase.dart';
+import '../../../domain/transaction/usecases/reset_vibe_statuses_usecase.dart';
 import '../../../domain/transaction/usecases/update_transaction_usecase.dart';
 import '../../../domain/transaction/usecases/update_vibe_status_usecase.dart';
 import '../../../domain/transaction/usecases/watch_transactions_usecase.dart';
@@ -16,6 +17,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
   final UpdateTransactionUseCase updateTransactionUseCase;
   final DeleteTransactionUseCase deleteTransactionUseCase;
   final UpdateVibeStatusUseCase updateVibeStatusUseCase;
+  final ResetVibeStatusesUseCase resetVibeStatusesUseCase;
 
   StreamSubscription<List<TransactionEntity>>? _subscription;
   List<TransactionEntity> _expenses = [];
@@ -27,6 +29,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     required this.updateTransactionUseCase,
     required this.deleteTransactionUseCase,
     required this.updateVibeStatusUseCase,
+    required this.resetVibeStatusesUseCase,
   }) : super(ExpenseInitial());
 
   void watchUserExpenses(String userId) {
@@ -141,6 +144,23 @@ class ExpenseCubit extends Cubit<ExpenseState> {
         transactionId: expenseId,
         vibeStatus: vibeStatus,
       );
+      return true;
+    } catch (error) {
+      emit(ExpenseError(error.toString()));
+      emit(ExpenseLoaded(expenses: _expenses));
+      return false;
+    }
+  }
+
+  Future<bool> resetVibeHistory() async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(ExpenseError('Vibe geçmişini sıfırlamak için giriş yapmalısın'));
+      return false;
+    }
+
+    try {
+      await resetVibeStatusesUseCase(userId);
       return true;
     } catch (error) {
       emit(ExpenseError(error.toString()));

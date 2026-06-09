@@ -25,7 +25,7 @@ class LoginHeader extends StatelessWidget {
         SizedBox(height: 10),
 
         Text(
-          "BASLA",
+          "BAŞLA",
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
         ),

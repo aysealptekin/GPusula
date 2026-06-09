@@ -221,10 +221,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     try {
-      await firestore.collection('users').doc(userId).set(
-            profileData,
-            SetOptions(merge: true),
-          );
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .set(profileData, SetOptions(merge: true));
     } on FirebaseException {
       // Auth kaydi basariliysa profil dokumani rules nedeniyle yazilamasa da
       // kullanicinin kaydini bozmayalim.

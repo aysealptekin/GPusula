@@ -71,4 +71,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
       vibeStatus: vibeStatus,
     );
   }
+
+  @override
+  Future<void> resetVibeStatuses(String userId) {
+    return transactionService.resetVibeStatuses(userId);
+  }
 }

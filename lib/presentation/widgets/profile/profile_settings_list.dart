@@ -10,7 +10,9 @@ class ProfileSettingsList extends StatelessWidget {
   final String? photoUrl;
   final VoidCallback onEditProfile;
   final VoidCallback onChangePassword;
+  final VoidCallback onChangeVibeSchedule;
   final VoidCallback onClearHistory;
+  final VoidCallback onResetVibeHistory;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
 
@@ -21,7 +23,9 @@ class ProfileSettingsList extends StatelessWidget {
     this.photoUrl,
     required this.onEditProfile,
     required this.onChangePassword,
+    required this.onChangeVibeSchedule,
     required this.onClearHistory,
+    required this.onResetVibeHistory,
     required this.onLogout,
     required this.onDeleteAccount,
   });
@@ -51,9 +55,23 @@ class ProfileSettingsList extends StatelessWidget {
             color: Colors.lightBlueAccent,
             onTap: onChangePassword,
           ),
+          SettingsTile(
+            icon: Icons.event_repeat_rounded,
+            title: 'Vibe Check Gününü Değiştir',
+            subtitle: 'Aylık Vibe Check tarihini ve sıklığını seç',
+            color: Colors.amberAccent,
+            onTap: onChangeVibeSchedule,
+          ),
           const SizedBox(height: 24),
           const _SectionTitle('Veri Yönetimi'),
           const SizedBox(height: 12),
+          SettingsTile(
+            icon: Icons.restart_alt_rounded,
+            title: 'Vibe Geçmişini Sıfırla',
+            subtitle: 'Match/Miss kararlarını yeniden değerlendir',
+            color: Colors.orangeAccent,
+            onTap: onResetVibeHistory,
+          ),
           SettingsTile(
             icon: Icons.delete_outline,
             title: 'Harcama Geçmişini Temizle',

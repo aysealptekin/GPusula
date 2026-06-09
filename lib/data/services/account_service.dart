@@ -1,21 +1,18 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_storage/firebase_storage.dart';
 
 class AccountService {
   final firebase_auth.FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
-  final FirebaseStorage storage;
 
   AccountService({
     firebase_auth.FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
-    FirebaseStorage? storage,
   }) : firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-       firestore = firestore ?? FirebaseFirestore.instance,
-       storage = storage ?? FirebaseStorage.instance;
+       firestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<Map<String, dynamic>?> watchUserProfile(String userId) {
     return firestore.collection('users').doc(userId).snapshots().map((doc) {
@@ -68,12 +65,13 @@ class AccountService {
     String? photoUrl;
 
     if (photoBytes != null) {
-      final ref = storage.ref('users/$userId/profile.jpg');
-      await ref.putData(
-        Uint8List.fromList(photoBytes),
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-      photoUrl = await ref.getDownloadURL();
+      if (photoBytes.length > 750000) {
+        throw Exception(
+          'Profil fotografi cok buyuk. Daha kucuk bir fotograf sec.',
+        );
+      }
+
+      photoUrl = 'data:image/jpeg;base64,${base64Encode(photoBytes)}';
     }
 
     final profileData = <String, dynamic>{
@@ -92,9 +90,23 @@ class AccountService {
         .set(profileData, SetOptions(merge: true));
 
     await user?.updateDisplayName(name.trim());
-    if (photoUrl != null) {
+    if (photoUrl != null && !photoUrl.startsWith('data:')) {
       await user?.updatePhotoURL(photoUrl);
     }
+  }
+
+  Future<void> updateVibeSchedule({
+    required String userId,
+    required int day,
+    required int secondDay,
+    required int frequency,
+  }) {
+    return firestore.collection('users').doc(userId).set({
+      'vibeCheckDay': day,
+      'vibeCheckSecondDay': secondDay,
+      'vibeCheckFrequency': frequency,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> deleteCurrentUserAccount({required String password}) async {

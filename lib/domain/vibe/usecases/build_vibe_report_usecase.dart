@@ -12,7 +12,9 @@ class BuildVibeReportUseCase {
   VibeReport call(List<TransactionEntity> transactions) {
     final matches = buildVibeMatchesUseCase(transactions);
     final matchedAmount = transactions
-        .where((transaction) => transaction.isExpense && transaction.isVibeMatch)
+        .where(
+          (transaction) => transaction.isExpense && transaction.isVibeMatch,
+        )
         .fold<double>(0, (total, transaction) => total + transaction.amount);
     final missedAmount = transactions
         .where((transaction) => transaction.isExpense && transaction.isVibeMiss)

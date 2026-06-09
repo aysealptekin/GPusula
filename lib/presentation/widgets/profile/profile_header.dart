@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -57,6 +59,10 @@ class ProfileHeader extends StatelessWidget {
   ImageProvider _profileImage() {
     final url = photoUrl;
     if (url != null && url.trim().isNotEmpty) {
+      if (url.startsWith('data:image')) {
+        return MemoryImage(base64Decode(url.split(',').last));
+      }
+
       return NetworkImage(url);
     }
 

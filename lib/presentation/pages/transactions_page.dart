@@ -19,6 +19,9 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   String? _selectedCategory;
   String _selectedType = 'all';
+  String _selectedDateRange = 'all';
+  String _selectedVibeStatus = 'all';
+  String _searchText = '';
   bool _initializedFromRoute = false;
 
   @override
@@ -150,6 +153,20 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   });
                 },
               ),
+              _TransactionSearchAndFilters(
+                searchText: _searchText,
+                selectedDateRange: _selectedDateRange,
+                selectedVibeStatus: _selectedVibeStatus,
+                onSearchChanged: (value) {
+                  setState(() => _searchText = value);
+                },
+                onDateRangeChanged: (value) {
+                  setState(() => _selectedDateRange = value);
+                },
+                onVibeStatusChanged: (value) {
+                  setState(() => _selectedVibeStatus = value);
+                },
+              ),
               Expanded(
                 child: TransactionList(
                   transactions: filteredTransactions,
@@ -167,20 +184,170 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<TransactionEntity> _filteredTransactions(
     List<TransactionEntity> transactions,
   ) {
-    if (_selectedType == 'income') {
-      return transactions.where((transaction) => transaction.isIncome).toList();
-    }
+    return transactions.where((transaction) {
+      if (_selectedType == 'income' && !transaction.isIncome) return false;
+      if (_selectedCategory != null &&
+          (!transaction.isExpense ||
+              transaction.category != _selectedCategory)) {
+        return false;
+      }
 
-    if (_selectedCategory != null) {
-      return transactions
-          .where(
-            (transaction) =>
-                transaction.isExpense &&
-                transaction.category == _selectedCategory,
+      if (!_matchesDateRange(transaction)) return false;
+      if (!_matchesVibeStatus(transaction)) return false;
+
+      final query = _searchText.trim().toLowerCase();
+      if (query.isNotEmpty &&
+          !transaction.title.toLowerCase().contains(query) &&
+          !transaction.category.toLowerCase().contains(query)) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  bool _matchesDateRange(TransactionEntity transaction) {
+    final now = DateTime.now();
+    final createdAt = transaction.createdAt;
+
+    switch (_selectedDateRange) {
+      case '7days':
+        return createdAt.isAfter(now.subtract(const Duration(days: 7)));
+      case 'month':
+        return createdAt.year == now.year && createdAt.month == now.month;
+      case 'lastMonth':
+        final lastMonth = DateTime(now.year, now.month - 1);
+        return createdAt.year == lastMonth.year &&
+            createdAt.month == lastMonth.month;
+      default:
+        return true;
+    }
+  }
+
+  bool _matchesVibeStatus(TransactionEntity transaction) {
+    switch (_selectedVibeStatus) {
+      case 'match':
+        return transaction.isVibeMatch;
+      case 'miss':
+        return transaction.isVibeMiss;
+      case 'pending':
+        return transaction.isExpense && transaction.isVibePending;
+      default:
+        return true;
+    }
+  }
+}
+
+class _TransactionSearchAndFilters extends StatelessWidget {
+  final String searchText;
+  final String selectedDateRange;
+  final String selectedVibeStatus;
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onDateRangeChanged;
+  final ValueChanged<String> onVibeStatusChanged;
+
+  const _TransactionSearchAndFilters({
+    required this.searchText,
+    required this.selectedDateRange,
+    required this.selectedVibeStatus,
+    required this.onSearchChanged,
+    required this.onDateRangeChanged,
+    required this.onVibeStatusChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: onSearchChanged,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'İşlem veya kategori ara',
+              hintStyle: const TextStyle(color: Colors.white38),
+              prefixIcon: const Icon(Icons.search, color: Colors.white54),
+              filled: true,
+              fillColor: const Color(0xFF1A1D24),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _FilterDropdown(
+                  value: selectedDateRange,
+                  items: const {
+                    'all': 'Tüm zamanlar',
+                    '7days': 'Son 7 gün',
+                    'month': 'Bu ay',
+                    'lastMonth': 'Geçen ay',
+                  },
+                  onChanged: onDateRangeChanged,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _FilterDropdown(
+                  value: selectedVibeStatus,
+                  items: const {
+                    'all': 'Tüm vibe',
+                    'match': 'Match',
+                    'miss': 'Miss',
+                    'pending': 'Pending',
+                  },
+                  onChanged: onVibeStatusChanged,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterDropdown extends StatelessWidget {
+  final String value;
+  final Map<String, String> items;
+  final ValueChanged<String> onChanged;
+
+  const _FilterDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      dropdownColor: const Color(0xFF1A1D24),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFF1A1D24),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
+      style: const TextStyle(color: Colors.white, fontSize: 13),
+      iconEnabledColor: Colors.white70,
+      items: items.entries
+          .map(
+            (entry) =>
+                DropdownMenuItem(value: entry.key, child: Text(entry.value)),
           )
-          .toList();
-    }
-
-    return transactions;
+          .toList(),
+      onChanged: (value) {
+        if (value != null) onChanged(value);
+      },
+    );
   }
 }

@@ -12,5 +12,12 @@ abstract class AccountRepository {
     List<int>? photoBytes,
   });
 
+  Future<void> updateVibeSchedule({
+    required String userId,
+    required int day,
+    required int secondDay,
+    required int frequency,
+  });
+
   Future<void> deleteCurrentUserAccount({required String password});
 }

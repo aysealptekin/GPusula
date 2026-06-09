@@ -12,8 +12,13 @@ import 'transaction_type_selector.dart';
 
 class AddExpenseSheet extends StatefulWidget {
   final TransactionEntity? transaction;
+  final String initialType;
 
-  const AddExpenseSheet({super.key, this.transaction});
+  const AddExpenseSheet({
+    super.key,
+    this.transaction,
+    this.initialType = 'expense',
+  });
 
   @override
   State<AddExpenseSheet> createState() => _AddExpenseSheetState();
@@ -32,6 +37,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   @override
   void initState() {
     super.initState();
+    _selectedType = widget.initialType;
 
     final transaction = widget.transaction;
     if (transaction == null) return;

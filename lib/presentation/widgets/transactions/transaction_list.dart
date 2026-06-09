@@ -38,10 +38,26 @@ class TransactionList extends StatelessWidget {
           amount: ExpenseViewHelpers.signedAmount(transaction),
           icon: ExpenseViewHelpers.categoryIcon(transaction.category),
           color: ExpenseViewHelpers.categoryColor(transaction.category),
+          statusLabel: _vibeStatusLabel(transaction),
+          statusColor: _vibeStatusColor(transaction),
           onEdit: () => onEdit(transaction),
           onDelete: () => onDelete(transaction),
         );
       },
     );
+  }
+
+  String _vibeStatusLabel(TransactionEntity transaction) {
+    if (transaction.isIncome) return 'Gelir';
+    if (transaction.isVibeMatch) return 'Match';
+    if (transaction.isVibeMiss) return 'Miss';
+    return 'Pending';
+  }
+
+  Color _vibeStatusColor(TransactionEntity transaction) {
+    if (transaction.isIncome) return Colors.greenAccent;
+    if (transaction.isVibeMatch) return Colors.greenAccent;
+    if (transaction.isVibeMiss) return Colors.orangeAccent;
+    return Colors.white54;
   }
 }

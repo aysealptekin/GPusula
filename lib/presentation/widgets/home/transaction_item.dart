@@ -8,6 +8,8 @@ class TransactionItem extends StatelessWidget {
   final Color color;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final String? statusLabel;
+  final Color? statusColor;
 
   const TransactionItem({
     super.key,
@@ -18,6 +20,8 @@ class TransactionItem extends StatelessWidget {
     required this.color,
     this.onDelete,
     this.onEdit,
+    this.statusLabel,
+    this.statusColor,
   });
 
   @override
@@ -69,6 +73,24 @@ class TransactionItem extends StatelessWidget {
               fontSize: 16,
             ),
           ),
+          if (statusLabel != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: (statusColor ?? Colors.white54).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                statusLabel!,
+                style: TextStyle(
+                  color: statusColor ?? Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

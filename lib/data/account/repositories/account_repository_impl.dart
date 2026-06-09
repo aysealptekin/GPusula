@@ -16,6 +16,9 @@ class AccountRepositoryImpl implements AccountRepository {
         name: profile['name'] as String? ?? '',
         email: profile['email'] as String? ?? '',
         photoUrl: profile['photoUrl'] as String?,
+        vibeCheckDay: profile['vibeCheckDay'] as int? ?? 28,
+        vibeCheckSecondDay: profile['vibeCheckSecondDay'] as int? ?? 15,
+        vibeCheckFrequency: profile['vibeCheckFrequency'] as int? ?? 1,
       );
     });
   }
@@ -37,6 +40,21 @@ class AccountRepositoryImpl implements AccountRepository {
       name: name,
       email: email,
       photoBytes: photoBytes,
+    );
+  }
+
+  @override
+  Future<void> updateVibeSchedule({
+    required String userId,
+    required int day,
+    required int secondDay,
+    required int frequency,
+  }) {
+    return accountService.updateVibeSchedule(
+      userId: userId,
+      day: day,
+      secondDay: secondDay,
+      frequency: frequency,
     );
   }
 

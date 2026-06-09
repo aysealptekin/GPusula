@@ -6,6 +6,7 @@ import '../../../domain/account/entities/user_profile.dart';
 import '../../../domain/account/usecases/clear_transaction_history_usecase.dart';
 import '../../../domain/account/usecases/delete_current_user_account_usecase.dart';
 import '../../../domain/account/usecases/update_profile_usecase.dart';
+import '../../../domain/account/usecases/update_vibe_schedule_usecase.dart';
 import '../../../domain/account/usecases/watch_user_profile_usecase.dart';
 import 'account_state.dart';
 
@@ -13,6 +14,7 @@ class AccountCubit extends Cubit<AccountState> {
   final WatchUserProfileUseCase watchUserProfileUseCase;
   final ClearTransactionHistoryUseCase clearTransactionHistoryUseCase;
   final UpdateProfileUseCase updateProfileUseCase;
+  final UpdateVibeScheduleUseCase updateVibeScheduleUseCase;
   final DeleteCurrentUserAccountUseCase deleteCurrentUserAccountUseCase;
 
   StreamSubscription<UserProfile?>? _profileSubscription;
@@ -22,6 +24,7 @@ class AccountCubit extends Cubit<AccountState> {
     required this.watchUserProfileUseCase,
     required this.clearTransactionHistoryUseCase,
     required this.updateProfileUseCase,
+    required this.updateVibeScheduleUseCase,
     required this.deleteCurrentUserAccountUseCase,
   }) : super(const AccountState.initial());
 
@@ -59,6 +62,22 @@ class AccountCubit extends Cubit<AccountState> {
         name: name,
         email: email,
         photoBytes: photoBytes,
+      ),
+    );
+  }
+
+  Future<bool> updateVibeSchedule({
+    required String userId,
+    required int day,
+    required int secondDay,
+    required int frequency,
+  }) {
+    return _runAction(
+      () => updateVibeScheduleUseCase(
+        userId: userId,
+        day: day,
+        secondDay: secondDay,
+        frequency: frequency,
       ),
     );
   }

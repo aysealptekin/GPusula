@@ -54,10 +54,11 @@ class CategoriesPage extends StatelessWidget {
                     : '${(ratio * 100).toStringAsFixed(0)}%',
                 statusColor: ExpenseViewHelpers.categoryColor(category),
                 icon: ExpenseViewHelpers.categoryIcon(category),
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.transactions,
-                  arguments: category,
+                onTap: () => _showCategoryDetails(
+                  context: context,
+                  category: category,
+                  transactions: transactions,
+                  totalExpense: totalExpense,
                 ),
               );
             }).toList(),
@@ -74,5 +75,136 @@ class CategoriesPage extends StatelessWidget {
           (totals[expense.category] ?? 0) + expense.amount;
     }
     return totals;
+  }
+
+  void _showCategoryDetails({
+    required BuildContext context,
+    required String category,
+    required List<TransactionEntity> transactions,
+    required double totalExpense,
+  }) {
+    final categoryExpenses = transactions
+        .where(
+          (transaction) =>
+              transaction.isExpense && transaction.category == category,
+        )
+        .toList();
+    final amount = categoryExpenses.fold<double>(
+      0,
+      (total, transaction) => total + transaction.amount,
+    );
+    final matchAmount = categoryExpenses
+        .where((transaction) => transaction.isVibeMatch)
+        .fold<double>(0, (total, transaction) => total + transaction.amount);
+    final missAmount = categoryExpenses
+        .where((transaction) => transaction.isVibeMiss)
+        .fold<double>(0, (total, transaction) => total + transaction.amount);
+    final ratio = totalExpense == 0 ? 0.0 : amount / totalExpense;
+    final suggestedLimit = amount == 0 ? 0.0 : amount * 0.9;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(22),
+          decoration: const BoxDecoration(
+            color: AppColors.bgDark,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    ExpenseViewHelpers.categoryIcon(category),
+                    color: ExpenseViewHelpers.categoryColor(category),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    category,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _CategoryDetailRow(
+                label: 'Toplam harcama',
+                value: '${amount.toStringAsFixed(2)} TL',
+              ),
+              _CategoryDetailRow(
+                label: 'Toplam içindeki pay',
+                value: '%${(ratio * 100).toStringAsFixed(0)}',
+              ),
+              _CategoryDetailRow(
+                label: 'Vibe Match',
+                value: '${matchAmount.toStringAsFixed(2)} TL',
+              ),
+              _CategoryDetailRow(
+                label: 'Vibe Miss',
+                value: '${missAmount.toStringAsFixed(2)} TL',
+              ),
+              _CategoryDetailRow(
+                label: 'Önerilen limit',
+                value: '${suggestedLimit.toStringAsFixed(2)} TL',
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.transactions,
+                      arguments: category,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primarySoft,
+                    foregroundColor: Colors.black,
+                  ),
+                  child: const Text('İşlemleri Gör'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CategoryDetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CategoryDetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: const TextStyle(color: Colors.white60)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

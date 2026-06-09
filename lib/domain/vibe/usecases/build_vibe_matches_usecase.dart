@@ -6,14 +6,17 @@ class BuildVibeMatchesUseCase {
 
   List<VibeMatch> call(List<TransactionEntity> transactions) {
     final expenses = transactions
-        .where((transaction) => transaction.isExpense && transaction.isVibeMatch)
+        .where(
+          (transaction) => transaction.isExpense && transaction.isVibeMatch,
+        )
         .toList();
 
     if (expenses.isEmpty) return const [];
 
     final totals = <String, double>{};
     for (final expense in expenses) {
-      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+      totals[expense.category] =
+          (totals[expense.category] ?? 0) + expense.amount;
     }
 
     final totalExpense = totals.values.fold<double>(

@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../domain/transaction/entities/transaction.dart';
-import '../cubit/expense/expense_cubit.dart';
-import '../cubit/expense/expense_state.dart';
-import '../helpers/expense_view_helpers.dart';
 import '../widgets/common/custom_bottom_nav.dart';
-import '../widgets/common/empty_message.dart';
 
 class PusulaAiPage extends StatelessWidget {
   const PusulaAiPage({super.key});
@@ -22,276 +16,126 @@ class PusulaAiPage extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: BlocBuilder<ExpenseCubit, ExpenseState>(
-        builder: (context, state) {
-          if (state is ExpenseLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is ExpenseError) {
-            return Center(child: EmptyMessage(message: state.message));
-          }
-
-          final transactions = state is ExpenseLoaded
-              ? state.expenses
-              : const <TransactionEntity>[];
-
-          if (transactions.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: EmptyMessage(
-                  message: 'Öneri üretmek için önce gelir veya gider ekle',
-                ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1D24),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
               ),
-            );
-          }
-
-          final summary = _InsightSummary.fromTransactions(transactions);
-
-          return ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _AiHeaderCard(summary: summary),
-              const SizedBox(height: 18),
-              _InsightCard(
-                icon: Icons.account_balance_wallet_rounded,
-                title: 'Net durum',
-                description: summary.netBalance >= 0
-                    ? 'Gelirlerin giderlerinden önde. Bu tempoyu korursan birikim hedeflerine alan açılır.'
-                    : 'Giderlerin gelirlerini geçmiş. Bu ay küçük bir kategori limiti belirlemek iyi olur.',
-                color: summary.netBalance >= 0
-                    ? Colors.greenAccent
-                    : Colors.redAccent,
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _PremiumBadge(),
+                  SizedBox(height: 22),
+                  Text(
+                    'Pusula AI Premium',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Bu özellik sadece premium kullanıcılar için aktiftir.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      height: 1.45,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  _PremiumFeature(
+                    icon: Icons.psychology_alt_rounded,
+                    text: 'Harcama alışkanlıklarına özel yorumlar',
+                  ),
+                  SizedBox(height: 10),
+                  _PremiumFeature(
+                    icon: Icons.auto_graph_rounded,
+                    text: 'Vibe Match ve Miss kararlarından içgörü',
+                  ),
+                  SizedBox(height: 10),
+                  _PremiumFeature(
+                    icon: Icons.lock_rounded,
+                    text: 'Premium üyelikle açılacak akıllı öneriler',
+                  ),
+                ],
               ),
-              _InsightCard(
-                icon: ExpenseViewHelpers.categoryIcon(summary.topCategory),
-                title: 'Dikkat çeken kategori',
-                description:
-                    '${summary.topCategory} tarafında ${summary.topCategoryAmount.toStringAsFixed(2)} TL harcama var. Bu alan ayın en güçlü sinyali.',
-                color: ExpenseViewHelpers.categoryColor(summary.topCategory),
-              ),
-              _InsightCard(
-                icon: Icons.flag_rounded,
-                title: 'Mini görev',
-                description:
-                    'Sonraki harcamanda ${summary.topCategory} için kendine küçük bir üst sınır koy ve Serüven ekranından etkisini takip et.',
-                color: AppColors.primarySoft,
-              ),
-            ],
-          );
-        },
+            ),
+          ),
+        ),
       ),
       bottomNavigationBar: const CustomBottomNav(currentIndex: 2),
     );
   }
 }
 
-class _InsightSummary {
-  final double totalIncome;
-  final double totalExpense;
-  final double netBalance;
-  final String topCategory;
-  final double topCategoryAmount;
-
-  const _InsightSummary({
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.netBalance,
-    required this.topCategory,
-    required this.topCategoryAmount,
-  });
-
-  factory _InsightSummary.fromTransactions(
-    List<TransactionEntity> transactions,
-  ) {
-    var totalIncome = 0.0;
-    var totalExpense = 0.0;
-    final categoryTotals = <String, double>{};
-
-    for (final transaction in transactions) {
-      if (transaction.isIncome) {
-        totalIncome += transaction.amount;
-      } else {
-        totalExpense += transaction.amount;
-        categoryTotals[transaction.category] =
-            (categoryTotals[transaction.category] ?? 0) + transaction.amount;
-      }
-    }
-
-    var topCategory = 'Diğer';
-    var topCategoryAmount = 0.0;
-    for (final entry in categoryTotals.entries) {
-      if (entry.value > topCategoryAmount) {
-        topCategory = entry.key;
-        topCategoryAmount = entry.value;
-      }
-    }
-
-    return _InsightSummary(
-      totalIncome: totalIncome,
-      totalExpense: totalExpense,
-      netBalance: totalIncome - totalExpense,
-      topCategory: topCategory,
-      topCategoryAmount: topCategoryAmount,
-    );
-  }
-}
-
-class _AiHeaderCard extends StatelessWidget {
-  final _InsightSummary summary;
-
-  const _AiHeaderCard({required this.summary});
+class _PremiumBadge extends StatelessWidget {
+  const _PremiumBadge();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(22),
+      width: 74,
+      height: 74,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.primarySoft.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.auto_awesome_rounded, color: AppColors.primarySoft),
-              SizedBox(width: 10),
-              Text(
-                'Finans pusulan',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricText(
-                  label: 'Gelir',
-                  value: '${summary.totalIncome.toStringAsFixed(2)} TL',
-                  color: Colors.greenAccent,
-                ),
-              ),
-              Expanded(
-                child: _MetricText(
-                  label: 'Gider',
-                  value: '${summary.totalExpense.toStringAsFixed(2)} TL',
-                  color: Colors.redAccent,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          _MetricText(
-            label: 'Net',
-            value: '${summary.netBalance.toStringAsFixed(2)} TL',
-            color: summary.netBalance >= 0
-                ? Colors.greenAccent
-                : Colors.redAccent,
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFBB92EE), Color(0xFF14B8A6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFBB92EE).withValues(alpha: 0.28),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
+      ),
+      child: const Icon(
+        Icons.workspace_premium_rounded,
+        color: Colors.white,
+        size: 38,
       ),
     );
   }
 }
 
-class _MetricText extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
+class _PremiumFeature extends StatelessWidget {
+  final IconData icon;
+  final String text;
 
-  const _MetricText({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _PremiumFeature({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(label, style: const TextStyle(color: Colors.white54)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        Icon(icon, color: AppColors.primarySoft, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(color: Colors.white70, height: 1.3),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _InsightCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
-
-  const _InsightCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -62,9 +62,35 @@ class TransactionService {
     required String transactionId,
     required String vibeStatus,
   }) {
-    return _transactionsRef(userId).doc(transactionId).update({
-      'vibeStatus': vibeStatus,
-    });
+    return _transactionsRef(
+      userId,
+    ).doc(transactionId).update({'vibeStatus': vibeStatus});
+  }
+
+  Future<void> resetVibeStatuses(String userId) async {
+    final snapshot = await _transactionsRef(userId).get();
+    final batches = <WriteBatch>[];
+    var batch = firestore.batch();
+    var operationCount = 0;
+
+    for (final doc in snapshot.docs) {
+      batch.update(doc.reference, {'vibeStatus': 'pending'});
+      operationCount++;
+
+      if (operationCount == 450) {
+        batches.add(batch);
+        batch = firestore.batch();
+        operationCount = 0;
+      }
+    }
+
+    if (operationCount > 0) {
+      batches.add(batch);
+    }
+
+    for (final batch in batches) {
+      await batch.commit();
+    }
   }
 
   Future<void> deleteTransaction({

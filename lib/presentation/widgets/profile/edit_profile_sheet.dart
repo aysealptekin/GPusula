@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -37,8 +38,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
   Future<void> _pickPhoto() async {
     final image = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      imageQuality: 75,
-      maxWidth: 900,
+      imageQuality: 65,
+      maxWidth: 320,
     );
 
     if (image == null) return;
@@ -193,6 +194,10 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
 
     final url = widget.photoUrl;
     if (url != null && url.trim().isNotEmpty) {
+      if (url.startsWith('data:image')) {
+        return MemoryImage(base64Decode(url.split(',').last));
+      }
+
       return NetworkImage(url);
     }
 
