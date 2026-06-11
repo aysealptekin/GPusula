@@ -84,7 +84,11 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         onLogin: _onLoginPressed,
                         onGoogleSignIn: () {
-                          context.read<AuthCubit>().signInWithGoogle();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Bu özellik şu anda aktif değil.'),
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 30),
